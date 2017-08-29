@@ -1,0 +1,34 @@
+name: gargoyle
+version: 0.1
+license: BSD3
+author: Obsidian Systems LLC
+maintainer: maintainer@obsidian.systems
+copyright: Copyright (C) Obsidian Systems LLC 2017
+-- category:
+build-type: Simple
+extra-source-files: ChangeLog.md
+cabal-version: >=1.10
+synopsis: Automatically spin up and spin down local daemons
+description:
+  Gargoyle is a framework for managing daemons from Haskell. In the current release the only requirement is that the daemon be able to communicate over a Unix domain socket. See <https://hackage.haskell.org/package/gargoyle-postgresql gargoyle-postgresql> for a fully worked out example.
+  .
+  To use Gargoyle the client must:
+  .
+  1. Define a value of the 'Gargoyle' type which specifies how to administer the daemon.
+  2. Create an executable whose `main` is 'gargoyleMain'. The name of this executable should match the executable name specified in the '_gargoyle_exec' field of the 'Gargoyle'.
+  3. The client will run their code with 'withGargoyle' to gain access to the daemon.
+
+library
+  exposed-modules: Gargoyle
+  -- other-modules:
+  -- other-extensions:
+  ghc-options: -Wall
+  ghc-prof-options: -fprof-auto
+  build-depends: base
+               , directory
+               , filepath
+               , network
+               , process
+               , unix
+  hs-source-dirs: src
+  default-language: Haskell2010

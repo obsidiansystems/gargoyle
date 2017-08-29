@@ -1,0 +1,92 @@
+name: gargoyle-postgresql
+version: 0.1
+license: BSD3
+author: Obsidian Systems LLC
+maintainer: maintainer@obsidian.systems
+copyright: Copyright (C) 2017 Obsidian Systems LLC
+-- category:
+build-type: Simple
+extra-source-files: ChangeLog.md
+cabal-version: >=1.10
+synopsis: Manage PostgreSQL servers with gargoyle
+description:
+  This package provides tools for managing PostgreSQL servers that live in local folders and communicate via a Unix domain socket. It uses the <https://hackage.haskell.org/package/gargoyle gargoyle> package in order to automatically initialize, spin up, and spin down such servers according to client demand.
+  .
+  The `gargoyle-psql` executable is such a client which will try to connect to a PostgreSQL server at a given location:
+  .
+  > gargoyle-psql db
+  .
+  > psql (9.5.6)
+  > Type "help" for help.
+  >
+  > postgres=#
+  .
+  Note that `gargoyle-psql` assumes that PostgreSQL executables such as `psql` are available on the PATH. A custom 'Gargoyle' is required to use non-standard PostgreSQL installations.
+
+-- Requires postgres to be in the environment to run
+flag enable-psql-test
+  default: False
+  manual: True
+
+library
+  exposed-modules: Gargoyle.PostgreSQL
+  -- other-modules:
+  -- other-extensions:
+  ghc-options: -Wall
+  ghc-prof-options: -fprof-auto
+  build-depends: base
+               , bytestring
+               , directory
+               , gargoyle
+               , process
+               , stringsearch
+               , text
+               , unix
+  hs-source-dirs: src
+  default-language: Haskell2010
+
+executable gargoyle-psql
+  main-is: gargoyle-psql.hs
+  hs-source-dirs: src-bin
+  ghc-options: -Wall -threaded
+  ghc-prof-options: -fprof-auto
+  default-language: Haskell2010
+  build-depends: base
+               , bytestring
+               , process
+               , text
+               , unix
+               , gargoyle
+               , gargoyle-postgresql
+
+executable gargoyle-postgres-monitor
+  main-is: gargoyle-postgres-monitor.hs
+  hs-source-dirs: src-bin
+  ghc-options: -Wall -threaded
+  ghc-prof-options: -fprof-auto
+  default-language: Haskell2010
+  build-depends: base
+               , bytestring
+               , process
+               , text
+               , gargoyle
+               , gargoyle-postgresql
+
+test-suite gargoyle-psql-test
+  type: exitcode-stdio-1.0
+  main-is: gargoyle-psql-test.hs
+  ghc-options: -Wall -threaded
+  ghc-prof-options: -fprof-auto
+  hs-source-dirs: tests
+  if !flag(enable-psql-test)
+    buildable: False
+  else
+    build-depends: base
+                 , bytestring
+                 , directory
+                 , filepath
+                 , process
+                 , text
+                 , unix
+                 , gargoyle
+                 , gargoyle-postgresql
