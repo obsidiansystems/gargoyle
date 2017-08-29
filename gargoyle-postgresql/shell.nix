@@ -19,6 +19,9 @@ let
         executableHaskellDepends = [
           base bytestring gargoyle process text unix
         ];
+        testHaskellDepends = [
+          pkgs.postgresql
+        ];
         description = "Manage PostgreSQL servers with gargoyle";
         license = stdenv.lib.licenses.bsd3;
       };
