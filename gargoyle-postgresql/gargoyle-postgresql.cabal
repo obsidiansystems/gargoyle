@@ -4,7 +4,7 @@ license: BSD3
 author: Obsidian Systems LLC
 maintainer: maintainer@obsidian.systems
 copyright: Copyright (C) 2017 Obsidian Systems LLC
--- category:
+category: PostgreSQL
 build-type: Simple
 extra-source-files: ChangeLog.md
 cabal-version: >=1.10
@@ -30,8 +30,6 @@ flag enable-psql-test
 
 library
   exposed-modules: Gargoyle.PostgreSQL
-  -- other-modules:
-  -- other-extensions:
   ghc-options: -Wall
   ghc-prof-options: -fprof-auto
   build-depends: base

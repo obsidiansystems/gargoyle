@@ -4,7 +4,7 @@ license: BSD3
 author: Obsidian Systems LLC
 maintainer: maintainer@obsidian.systems
 copyright: Copyright (C) Obsidian Systems LLC 2017
--- category:
+category: System
 build-type: Simple
 extra-source-files: ChangeLog.md
 cabal-version: >=1.10
@@ -20,8 +20,6 @@ description:
 
 library
   exposed-modules: Gargoyle
-  -- other-modules:
-  -- other-extensions:
   ghc-options: -Wall
   ghc-prof-options: -fprof-auto
   build-depends: base
