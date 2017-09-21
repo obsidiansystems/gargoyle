@@ -65,6 +65,9 @@ withGargoyle :: Gargoyle pid a -- ^ Description of how to manage the daemon.
                 -- ^ By the time this function returns, the monitor process is aware that the
                 -- the client is no longer interested in the daemon.
 withGargoyle g daemonDir b = do
+  when (not rtsSupportsBoundThreads) $ do
+    hPutStrLn stderr "Gargoyle requires threaded run-time, aborting"
+    exitFailure
   daemonExists <- doesDirectoryExist daemonDir
   if daemonExists
     then do
@@ -88,7 +91,7 @@ withGargoyle g daemonDir b = do
                     , std_out = CreatePipe
                     , std_err = Inherit }
               (Just monIn, Just monOut, Nothing, monHnd) <- createProcess monProc
-              void $ forkIO $ void $ waitForProcess monHnd
+              void $ forkOS $ void $ waitForProcess monHnd
               hClose monIn
               r <- hGetLine monOut
               case r of
