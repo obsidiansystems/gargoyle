@@ -1,5 +1,6 @@
 -- | Utilities for running a daemon in a local directory
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Gargoyle
@@ -18,6 +19,7 @@ import System.FilePath
 import System.IO
 import System.IO.Error
 import System.Environment
+import System.FileLock
 import System.Process
 
 import Debug.Trace
@@ -46,6 +48,9 @@ gWorkDir = (</> "work")
 
 gOldWorkDir :: FilePath -> FilePath
 gOldWorkDir = (</> "db")
+
+gLockDir :: FilePath -> FilePath
+gLockDir = (</> "lock")
 
 -- | Run an IO action while maintaining a connection to a daemon. The daemon will automatically be
 -- stopped when no clients remain. If the daemon has not yet been initialized, it will be.
@@ -108,6 +113,20 @@ gargoyleMain g = do
   [daemonDir] <- getArgs >>= \case
     x@[_] -> return x
     _ -> fail "Gargoyle monitor received unexpected number of arguments"
+  let lockPath = gLockDir daemonDir
+  -- Make sure the lock file is there
+  catch (openFile lockPath WriteMode >>= hClose) $ \(e :: IOException) -> if
+    | isAlreadyInUseError e -> return ()
+    | isDoesNotExistError e -> throwIO e -- this means it's not a file but it exists
+    | isPermissionError e -> throwIO e -- the daemon directory is in a bad state
+  -- The daemon tries to hold on to the lock file for its lifetime, signaling that it is
+  -- accepting connections.
+  tryLockFile lockPath Exclusive >>= \case
+    Just _ -> return ()
+    Nothing -> do
+      putStrLn "retry"
+      hFlush stdout
+      exitFailure
   -- Clients must maintain a connection to controlSocket to ensure that
   -- the daemon doesn't get shut down
   controlSocket <- socket AF_UNIX Stream defaultProtocol
@@ -119,6 +138,10 @@ gargoyleMain g = do
           Left e
             | isAlreadyInUseError e
             -> do
+              -- This is safe because all gargoyle monitors try to take a lock before trying
+              -- to mess with the control socket. This avoids race conditions provided that
+              -- only gargoyle monitors touch the daemon directory.
+              removePathForcibly socketPath
               putStrLn "retry"
               hFlush stdout
               exitFailure
