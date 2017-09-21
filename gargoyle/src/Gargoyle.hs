@@ -52,6 +52,11 @@ gOldWorkDir = (</> "db")
 gLockDir :: FilePath -> FilePath
 gLockDir = (</> "lock")
 
+checkThreadedRuntime :: IO ()
+checkThreadedRuntime = when (not rtsSupportsBoundThreads) $ do
+  hPutStrLn stderr "Gargoyle requires threaded run-time, aborting"
+  assert rtsSupportsBoundThreads () -- throws an AssertionFailed exception
+
 -- | Run an IO action while maintaining a connection to a daemon. The daemon will automatically be
 -- stopped when no clients remain. If the daemon has not yet been initialized, it will be.
 -- The counterpart of this function is 'gargoyleMain' which should be used to produce an executable
@@ -65,9 +70,7 @@ withGargoyle :: Gargoyle pid a -- ^ Description of how to manage the daemon.
                 -- ^ By the time this function returns, the monitor process is aware that the
                 -- the client is no longer interested in the daemon.
 withGargoyle g daemonDir b = do
-  when (not rtsSupportsBoundThreads) $ do
-    hPutStrLn stderr "Gargoyle requires threaded run-time, aborting"
-    exitFailure
+  checkThreadedRuntime
   daemonExists <- doesDirectoryExist daemonDir
   if daemonExists
     then do
@@ -113,6 +116,7 @@ gargoyleMain :: Gargoyle pid a
              -- ^ Description of how to initialize, spin up, and spin down a daemon.
              -> IO () -- ^ Returns only when all clients have disconnected.
 gargoyleMain g = do
+  checkThreadedRuntime
   [daemonDir] <- getArgs >>= \case
     x@[_] -> return x
     _ -> fail "Gargoyle monitor received unexpected number of arguments"
@@ -160,12 +164,12 @@ gargoyleMain g = do
     numClientsVar <- newMVar (0 :: Int)
     -- When this var is filled, the server will shut down
     shutdownVar <- newEmptyMVar
-    void $ forkIO $ forever $ do
+    void $ forkOS $ forever $ do
       (s, _) <- accept controlSocket
       --TODO: What happens if we decide we're shutting down here?
       modifyMVar_ numClientsVar $ \n -> do
         return $ succ n
-      forkIO $ do
+      forkOS $ do
         h <- socketToHandle s ReadMode
         -- Block until we hit EOF; if we successfully read a character that means the client is
         -- in violation of the protocol, so we shut them down too
