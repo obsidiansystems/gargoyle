@@ -121,8 +121,8 @@ gargoyleMain g = do
     | isPermissionError e -> throwIO e -- the daemon directory is in a bad state
   -- The daemon tries to hold on to the lock file for its lifetime, signaling that it is
   -- accepting connections.
-  tryLockFile lockPath Exclusive >>= \case
-    Just _ -> return ()
+  lock <- tryLockFile lockPath Exclusive >>= \case
+    Just x -> return x
     Nothing -> do
       putStrLn "retry"
       hFlush stdout
@@ -181,3 +181,4 @@ gargoyleMain g = do
       hSetBuffering stdout LineBuffering
       putStrLn "ready" -- Signal to the invoker that we're ready
       takeMVar shutdownVar
+  unlockFile lock
