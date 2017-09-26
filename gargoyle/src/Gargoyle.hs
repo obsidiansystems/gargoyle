@@ -55,7 +55,7 @@ gLockDir = (</> "lock")
 checkThreadedRuntime :: IO ()
 checkThreadedRuntime = when (not rtsSupportsBoundThreads) $ do
   hPutStrLn stderr "Gargoyle requires threaded run-time, aborting"
-  assert rtsSupportsBoundThreads () -- throws an AssertionFailed exception
+  assert rtsSupportsBoundThreads (return ()) -- throws an AssertionFailed exception
 
 -- | Run an IO action while maintaining a connection to a daemon. The daemon will automatically be
 -- stopped when no clients remain. If the daemon has not yet been initialized, it will be.
