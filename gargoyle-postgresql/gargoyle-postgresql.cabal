@@ -6,7 +6,6 @@ maintainer: maintainer@obsidian.systems
 copyright: Copyright (C) 2017 Obsidian Systems LLC
 category: PostgreSQL
 build-type: Simple
-extra-source-files: ChangeLog.md
 cabal-version: >=1.10
 synopsis: Manage PostgreSQL servers with gargoyle
 description:
@@ -41,14 +40,14 @@ library
   exposed-modules: Gargoyle.PostgreSQL
   ghc-options: -Wall
   ghc-prof-options: -fprof-auto
-  build-depends: base
-               , bytestring
-               , directory
-               , gargoyle
-               , process
-               , stringsearch
-               , text
-               , unix
+  build-depends: base >= 4.9 && < 4.11
+               , bytestring == 0.10.*
+               , directory == 1.3.*
+               , gargoyle == 0.1.*
+               , process == 1.4.*
+               , stringsearch == 0.3.*
+               , text == 1.2.*
+               , unix == 2.7.*
   hs-source-dirs: src
   default-language: Haskell2010
 
@@ -60,11 +59,11 @@ executable gargoyle-psql
   default-language: Haskell2010
   build-depends: base
                , bytestring
+               , gargoyle
+               , gargoyle-postgresql
                , process
                , text
                , unix
-               , gargoyle
-               , gargoyle-postgresql
 
 executable gargoyle-postgres-monitor
   main-is: gargoyle-postgres-monitor.hs
@@ -74,10 +73,10 @@ executable gargoyle-postgres-monitor
   default-language: Haskell2010
   build-depends: base
                , bytestring
-               , process
-               , text
                , gargoyle
                , gargoyle-postgresql
+               , process
+               , text
 
 test-suite gargoyle-psql-test
   type: exitcode-stdio-1.0
@@ -92,8 +91,8 @@ test-suite gargoyle-psql-test
                  , bytestring
                  , directory
                  , filepath
+                 , gargoyle
+                 , gargoyle-postgresql
                  , process
                  , text
                  , unix
-                 , gargoyle
-                 , gargoyle-postgresql

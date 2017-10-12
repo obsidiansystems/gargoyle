@@ -1,12 +1,12 @@
 name: gargoyle
 version: 0.1
 license: BSD3
+license-file: LICENSE
 author: Obsidian Systems LLC
 maintainer: maintainer@obsidian.systems
 copyright: Copyright (C) Obsidian Systems LLC 2017
 category: System
 build-type: Simple
-extra-source-files: ChangeLog.md
 cabal-version: >=1.10
 synopsis: Automatically spin up and spin down local daemons
 description:
@@ -22,11 +22,11 @@ library
   exposed-modules: Gargoyle
   ghc-options: -Wall
   ghc-prof-options: -fprof-auto
-  build-depends: base
-               , directory
-               , filepath
-               , filelock
-               , network
-               , process
+  build-depends: base >= 4.9 && < 4.11
+               , directory == 1.3.*
+               , filepath == 1.4.*
+               , filelock == 0.1.*
+               , network == 2.6.*
+               , process == 1.4.*
   hs-source-dirs: src
   default-language: Haskell2010
