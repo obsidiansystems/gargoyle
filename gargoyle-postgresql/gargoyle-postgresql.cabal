@@ -22,6 +22,15 @@ description:
   > postgres=#
   .
   Note that `gargoyle-psql` assumes that PostgreSQL executables such as `psql` are available on the PATH. A custom 'Gargoyle' is required to use non-standard PostgreSQL installations.
+  .
+  The following is an example of using this package to run <https://hackage.haskell.org/package/postgresql-simple postgresql-simple> actions using a local DB:
+  .
+  > import Database.PostgreSQL.Simple
+  > import Gargoyle
+  > import Gargoyle.PostgreSQL
+  >
+  > withDb :: String -> (Connection -> IO a) -> IO a
+  > withDb dbPath a = withGargoyle defaultPostgres dbPath $ \dbUri -> a =<< connectPostgreSQL dbUri
 
 -- Requires postgres to be in the environment to run
 flag enable-psql-test
