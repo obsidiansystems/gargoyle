@@ -82,6 +82,7 @@ startLocalPostgres binPath dbDir = do
   fix $ \loop -> do
     l <- hGetLine err
     let (tag, rest) = span (/= ':') l
+    when (tag == "HINT") loop
     when (tag /= "LOG") $ fail $ "startLocalPostgres: Unexpected output from postgres: " <> show l
     when (rest /= ":  database system is ready to accept connections") loop
   return postgres
