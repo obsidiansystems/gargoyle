@@ -62,6 +62,7 @@ executable gargoyle-psql
                , gargoyle
                , gargoyle-postgresql
                , process
+               , split
                , text
                , unix
 
