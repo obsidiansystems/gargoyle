@@ -68,27 +68,6 @@ getLocalPostgresConnectionString dbDir = do
     , (LBS.toStrict $ BS.replace "/" ("%2F" :: LBS.ByteString) $ T.encodeUtf8 $ T.pack absoluteDbDir)
     , "/postgres"
     ]
-{-
--- | Start a postgres server that is assumed to be in the given folder. This is a low level function
--- used to define the PostgreSQL 'Gargoyle'
-startLocalPostgres :: FilePath -- ^ Path to PostgreSQL `postgres` executable
-                   -> FilePath -- ^ Path where the server to start is located
-                   -> IO ProcessHandle -- ^ handle of the PostgreSQL server
-startLocalPostgres binPath dbDir = do
-  absoluteDbDir <- makeAbsolute dbDir
-  (_, _, err, postgres) <- runInteractiveProcess binPath
-    [ "-h", ""
-    , "-D", absoluteDbDir
-    , "-k", absoluteDbDir
-    ] Nothing Nothing
-  fix $ \loop -> do
-    l <- hGetLine err
-    let (tag, rest) = span (/= ':') l
-    when (tag == "HINT") loop
-    when (tag /= "LOG") $ fail $ "startLocalPostgres: Unexpected output from postgres: " <> show l
-    when (rest /= ":  database system is ready to accept connections") loop
-  return postgres
--}
 -- | Start a postgres server that is assumed to be in the given folder. This is a low level function
 -- used to define the PostgreSQL 'Gargoyle'
 startLocalPostgres :: FilePath -- ^ Path to PostgreSQL `postgres` executable
