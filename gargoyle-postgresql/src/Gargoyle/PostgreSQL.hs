@@ -6,7 +6,7 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Search as BS
 import Data.Function
-import Data.List.Split
+import Data.List.Split (wordsBy)
 import Data.Maybe
 import Data.Monoid
 import qualified Data.Text as T

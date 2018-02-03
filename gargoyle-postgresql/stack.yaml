@@ -20,7 +20,11 @@ extra-deps:
 - gargoyle-0.1
 nix:
   enable: true
-  packages: [pcre, zlib,postgresql100]
+  packages: [postgresql100]
+
+  # Unset by default. You cannot set this option if `packages:`
+  # is already present and not empty.
+  shell-file: shell.nix
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
