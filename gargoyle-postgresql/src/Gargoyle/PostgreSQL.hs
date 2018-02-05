@@ -23,20 +23,21 @@ import Gargoyle
 -- | A 'Gargoyle' that assumes `initdb` and `postgres` are in the path and
 -- will perform a 'fast shutdown' on termination (see below).
 defaultPostgres :: Gargoyle ProcessHandle ByteString
-defaultPostgres = mkPostgresGargoyle "initdb" "postgres" shutdownPostgresFast startEvalDefault 
+defaultPostgres = mkPostgresGargoyle "initdb" "postgres" "gargoyle-postgres-monitor" shutdownPostgresFast startEvalDefault 
 
 -- | Create a gargoyle by telling it where the relevant PostgreSQL executables are and
 -- what it should do in order to shut down the server. This module provides two options:
 -- 'shutdownPostgresSmart' and 'shutdownPostgresFast'.
 mkPostgresGargoyle :: FilePath -- ^ Path to `initdb`
                    -> FilePath -- ^ Path to `postgres`
+                   -> FilePath -- ^ Path to gargoyle monitor
                    -> (ProcessHandle -> IO ()) -- ^ Shutdown function
                    -> (Handle -> IO ()) -- ^ Startup evaluation function
                    -> Gargoyle ProcessHandle ByteString
                    -- ^ The 'Gargoyle' returned provides to client code the connection
                    -- string that can be used to connect to the PostgreSQL server
-mkPostgresGargoyle initdbPath postgresPath shutdownFun startEval = Gargoyle
-  { _gargoyle_exec = "gargoyle-postgres-monitor"
+mkPostgresGargoyle initdbPath postgresPath gmPath shutdownFun startEval = Gargoyle
+  { _gargoyle_exec = gmPath
   , _gargoyle_init = initLocalPostgres initdbPath
   , _gargoyle_start = startLocalPostgres postgresPath startEval
   , _gargoyle_stop = shutdownFun
@@ -99,6 +100,9 @@ startEvalAlternative err =
     l <- hGetLine err
     let (tag:split') = (drop 4 . wordsBy (== ' ')) l
         rest        = unwords split'
+    putStrLn ("DEBUG: whole line is: " <> l <> "\n")
+    putStrLn ("DEBUG: tage is: " <> tag <> "\n")
+    putStrLn ("DEBUG rest is: " <> rest <> "\n")
     when (tag == "HINT:") loop
     when (tag /= "LOG:") $ fail $ "startLocalPostgres: Unexpected output from postgres: " <> show l
     when (rest /= "database system is ready to accept connections") loop
