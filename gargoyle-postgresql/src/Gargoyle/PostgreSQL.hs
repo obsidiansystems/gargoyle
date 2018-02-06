@@ -100,9 +100,6 @@ startEvalAlternative err =
     l <- hGetLine err
     let (tag:split') = (drop 4 . wordsBy (== ' ')) l
         rest        = unwords split'
-    putStrLn ("DEBUG: whole line is: " <> l <> "\n")
-    putStrLn ("DEBUG: tage is: " <> tag <> "\n")
-    putStrLn ("DEBUG rest is: " <> rest <> "\n")
     when (tag == "HINT:") loop
     when (tag /= "LOG:") $ fail $ "startLocalPostgres: Unexpected output from postgres: " <> show l
     when (rest /= "database system is ready to accept connections") loop
