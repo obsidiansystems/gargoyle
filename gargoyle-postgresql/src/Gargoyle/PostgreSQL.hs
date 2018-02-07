@@ -6,6 +6,7 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Search as BS
 import Data.Function
+import Data.List.Split (wordsBy)
 import Data.Maybe
 import Data.Monoid
 import qualified Data.Text as T
@@ -22,21 +23,23 @@ import Gargoyle
 -- | A 'Gargoyle' that assumes `initdb` and `postgres` are in the path and
 -- will perform a 'fast shutdown' on termination (see below).
 defaultPostgres :: Gargoyle ProcessHandle ByteString
-defaultPostgres = mkPostgresGargoyle "initdb" "postgres" shutdownPostgresFast
+defaultPostgres = mkPostgresGargoyle "initdb" "postgres" "gargoyle-postgres-monitor" shutdownPostgresFast startEvalDefault 
 
 -- | Create a gargoyle by telling it where the relevant PostgreSQL executables are and
 -- what it should do in order to shut down the server. This module provides two options:
 -- 'shutdownPostgresSmart' and 'shutdownPostgresFast'.
 mkPostgresGargoyle :: FilePath -- ^ Path to `initdb`
                    -> FilePath -- ^ Path to `postgres`
+                   -> FilePath -- ^ Path to gargoyle monitor
                    -> (ProcessHandle -> IO ()) -- ^ Shutdown function
+                   -> (Handle -> IO ()) -- ^ Startup evaluation function
                    -> Gargoyle ProcessHandle ByteString
                    -- ^ The 'Gargoyle' returned provides to client code the connection
                    -- string that can be used to connect to the PostgreSQL server
-mkPostgresGargoyle initdbPath postgresPath shutdownFun = Gargoyle
-  { _gargoyle_exec = "gargoyle-postgres-monitor"
+mkPostgresGargoyle initdbPath postgresPath gmPath shutdownFun startEval = Gargoyle
+  { _gargoyle_exec = gmPath
   , _gargoyle_init = initLocalPostgres initdbPath
-  , _gargoyle_start = startLocalPostgres postgresPath
+  , _gargoyle_start = startLocalPostgres postgresPath startEval
   , _gargoyle_stop = shutdownFun
   , _gargoyle_getInfo = getLocalPostgresConnectionString
   }
@@ -66,27 +69,41 @@ getLocalPostgresConnectionString dbDir = do
     , (LBS.toStrict $ BS.replace "/" ("%2F" :: LBS.ByteString) $ T.encodeUtf8 $ T.pack absoluteDbDir)
     , "/postgres"
     ]
-
 -- | Start a postgres server that is assumed to be in the given folder. This is a low level function
 -- used to define the PostgreSQL 'Gargoyle'
 startLocalPostgres :: FilePath -- ^ Path to PostgreSQL `postgres` executable
-                   -> FilePath -- ^ Path where the server to start is located
-                   -> IO ProcessHandle -- ^ handle of the PostgreSQL server
-startLocalPostgres binPath dbDir = do
+                      -> (Handle -> IO ()) -- ^ action to evaluate output handle
+                      -> FilePath -- ^ Path where the server to start is located
+                      -> IO ProcessHandle
+startLocalPostgres binPath eval dbDir = do
   absoluteDbDir <- makeAbsolute dbDir
   (_, _, err, postgres) <- runInteractiveProcess binPath
     [ "-h", ""
     , "-D", absoluteDbDir
     , "-k", absoluteDbDir
     ] Nothing Nothing
+  eval err
+  return postgres
+
+startEvalDefault :: Handle -> IO ()
+startEvalDefault err =
   fix $ \loop -> do
     l <- hGetLine err
     let (tag, rest) = span (/= ':') l
     when (tag == "HINT") loop
     when (tag /= "LOG") $ fail $ "startLocalPostgres: Unexpected output from postgres: " <> show l
     when (rest /= ":  database system is ready to accept connections") loop
-  return postgres
 
+startEvalAlternative :: Handle -> IO ()
+startEvalAlternative err =
+ fix $ \loop -> do
+    l <- hGetLine err
+    let (tag:split') = (drop 4 . wordsBy (== ' ')) l
+        rest        = unwords split'
+    when (tag == "HINT:") loop
+    when (tag /= "LOG:") $ fail $ "startLocalPostgres: Unexpected output from postgres: " <> show l
+    when (rest /= "database system is ready to accept connections") loop
+ 
 -- | Perform a "Smart Shutdown" of Postgres;
 -- see http://www.postgresql.org/docs/current/static/server-shutdown.html
 shutdownPostgresSmart :: ProcessHandle -- ^ handle of the PostgreSQL server
