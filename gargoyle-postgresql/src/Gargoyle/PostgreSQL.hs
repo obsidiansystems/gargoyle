@@ -6,6 +6,7 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Search as BS
 import Data.Function
+import qualified Data.List as L
 import Data.Maybe
 import Data.Monoid
 import qualified Data.Text as T
@@ -73,6 +74,15 @@ startLocalPostgres :: FilePath -- ^ Path to PostgreSQL `postgres` executable
                    -> FilePath -- ^ Path where the server to start is located
                    -> IO ProcessHandle -- ^ handle of the PostgreSQL server
 startLocalPostgres binPath dbDir = do
+  version <- readProcess binPath ["--version"] ""
+  let processLog = case L.stripPrefix "postgres (PostgreSQL) " version of
+        Nothing -> fail $ "startLocalPostgres: failed to get version from: " <> version
+        Just v
+          -- PostgreSQL 10 logs look like
+          -- 2018-04-24 19:48:26.415 BST [17111] LOG:  listening on Unix socket ...
+          | takeWhile (/= '.') v == "10" -> drop 2 . dropWhile (/= ']')
+          | takeWhile (/= '.') v == "9" -> id
+          | otherwise -> fail $ "startLocalPostgres: unsupported postgres version: " <> v
   absoluteDbDir <- makeAbsolute dbDir
   (_, _, err, postgres) <- runInteractiveProcess binPath
     [ "-h", ""
@@ -81,7 +91,7 @@ startLocalPostgres binPath dbDir = do
     ] Nothing Nothing
   fix $ \loop -> do
     l <- hGetLine err
-    let (tag, rest) = span (/= ':') l
+    let (tag, rest) = span (/= ':') $ processLog l
     when (tag == "HINT") loop
     when (tag /= "LOG") $ fail $ "startLocalPostgres: Unexpected output from postgres: " <> show l
     when (rest /= ":  database system is ready to accept connections") loop
