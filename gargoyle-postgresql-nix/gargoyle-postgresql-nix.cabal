@@ -1,4 +1,4 @@
-name: gargoyle-nix
+name: gargoyle-postgresql-nix
 version: 0.1
 author: Obsidian Systems LLC
 maintainer: maintainer@obsidian.systems
@@ -12,7 +12,7 @@ description:
 library
   exposed-modules: Gargoyle.PostgreSQL.Nix
                  , System.Which
-  other-modules: Paths_gargoyle_nix
+  other-modules: Paths_gargoyle_postgresql_nix
   ghc-options: -Wall
   ghc-prof-options: -fprof-auto
   build-depends: base
@@ -34,7 +34,7 @@ executable gargoyle-nix-psql
   default-language: Haskell2010
   build-depends: base
                , gargoyle-postgresql
-               , gargoyle-nix
+               , gargoyle-postgresql-nix
 
 executable gargoyle-nix-postgres-monitor
   main-is: gargoyle-nix-postgres-monitor.hs
@@ -44,4 +44,4 @@ executable gargoyle-nix-postgres-monitor
   default-language: Haskell2010
   build-depends: base
                , gargoyle
-               , gargoyle-nix
+               , gargoyle-postgresql-nix

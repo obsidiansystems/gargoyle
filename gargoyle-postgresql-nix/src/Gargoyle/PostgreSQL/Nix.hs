@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell   #-}
 module Gargoyle.PostgreSQL.Nix where
 
 import Data.ByteString (ByteString)
@@ -9,8 +9,8 @@ import System.Process
 import Gargoyle
 import Gargoyle.PostgreSQL
 
+import Paths_gargoyle_postgresql_nix
 import System.Which
-import Paths_gargoyle_nix
 
 postgresNix :: IO (Gargoyle ProcessHandle ByteString)
 postgresNix = do
