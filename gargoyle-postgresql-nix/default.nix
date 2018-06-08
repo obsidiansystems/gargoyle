@@ -2,7 +2,7 @@
 , process, shelly, stdenv, template-haskell, text, postgresql
 }:
 mkDerivation {
-  pname = "gargoyle-nix";
+  pname = "gargoyle-postgresql-nix";
   version = "0.1";
   src = ./.;
   isLibrary = true;
