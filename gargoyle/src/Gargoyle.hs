@@ -20,6 +20,7 @@ import System.IO
 import System.IO.Error
 import System.Environment
 import System.FileLock
+import System.Posix.Process
 import System.Process
 
 import Debug.Trace
@@ -92,7 +93,10 @@ withGargoyle g daemonDir b = do
               let monProc = (proc (_gargoyle_exec g) [daemonDir])
                     { std_in = CreatePipe
                     , std_out = CreatePipe
-                    , std_err = Inherit }
+                    , std_err = Inherit
+                    , close_fds = True
+                    , new_session = True
+                    }
               (Just monIn, Just monOut, Nothing, monHnd) <- createProcess monProc
               void $ forkOS $ void $ waitForProcess monHnd
               hClose monIn
@@ -115,7 +119,7 @@ withGargoyle g daemonDir b = do
 gargoyleMain :: Gargoyle pid a
              -- ^ Description of how to initialize, spin up, and spin down a daemon.
              -> IO () -- ^ Returns only when all clients have disconnected.
-gargoyleMain g = do
+gargoyleMain g = void $ forkProcess $ do
   checkThreadedRuntime
   [daemonDir] <- getArgs >>= \case
     x@[_] -> return x
