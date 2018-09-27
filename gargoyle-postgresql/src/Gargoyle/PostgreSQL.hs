@@ -57,7 +57,9 @@ initLocalPostgres binPath dbDir = do
   r <- waitForProcess initdb
   case r of
     ExitSuccess -> return ()
-    _ -> putStrLn $ "initLocalPostgres failed: " ++ show r
+    _ -> do
+      putStrLn $ "initLocalPostgres failed: " ++ show r
+      exitWith r
 
 -- | Produces the connection string for a local postgresql database. This is a low level function
 -- used to define the PostgreSQL 'Gargoyle'
