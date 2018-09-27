@@ -53,7 +53,7 @@ initLocalPostgres binPath dbDir = do
     , "-U", "postgres"
     , "--no-locale"
     , "-E", "UTF8"
-    ]) { std_in = CreatePipe, std_out = CreatePipe, std_err = CreatePipe }
+    ]) { std_in = NoStream, std_out = NoStream, std_err = NoStream }
   r <- waitForProcess initdb
   case r of
     ExitSuccess -> return ()
