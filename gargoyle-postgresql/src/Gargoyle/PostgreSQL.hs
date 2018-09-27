@@ -48,12 +48,12 @@ initLocalPostgres :: FilePath -- ^ Path to PostgreSQL `initdb` executable
                   -> FilePath -- ^ Path in which to initialize PostgreSQL Server
                   -> IO ()
 initLocalPostgres binPath dbDir = do
-  (_, _, _, initdb) <- runInteractiveProcess binPath
+  (_, _, _, initdb) <- createProcess (proc binPath
     [ "-D", dbDir
     , "-U", "postgres"
     , "--no-locale"
     , "-E", "UTF8"
-    ] Nothing Nothing
+    ]) { std_in = CreatePipe, std_out = CreatePipe, std_err = CreatePipe }
   r <- waitForProcess initdb
   case r of
     ExitSuccess -> return ()
