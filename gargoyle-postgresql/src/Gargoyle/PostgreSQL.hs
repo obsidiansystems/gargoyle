@@ -5,54 +5,53 @@ import Control.Monad
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Search as BS
-import Data.Function
-import qualified Data.List as L
 import Data.Maybe
-import Data.Monoid
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import System.Directory
 import System.Exit
 import System.IO
+import System.Posix.Escape
 import System.Posix.Signals
 import System.Process
-import System.Process.Internals
 
 import Gargoyle
 
 -- | A 'Gargoyle' that assumes `initdb` and `postgres` are in the path and
 -- will perform a 'fast shutdown' on termination (see below).
-defaultPostgres :: Gargoyle ProcessHandle ByteString
-defaultPostgres = mkPostgresGargoyle "initdb" "postgres" shutdownPostgresFast
+defaultPostgres :: Gargoyle FilePath ByteString
+defaultPostgres = mkPostgresGargoyle "pg_ctl" shutdownPostgresFast
 
 -- | Create a gargoyle by telling it where the relevant PostgreSQL executables are and
 -- what it should do in order to shut down the server. This module provides two options:
 -- 'shutdownPostgresSmart' and 'shutdownPostgresFast'.
-mkPostgresGargoyle :: FilePath -- ^ Path to `initdb`
-                   -> FilePath -- ^ Path to `postgres`
-                   -> (ProcessHandle -> IO ()) -- ^ Shutdown function
-                   -> Gargoyle ProcessHandle ByteString
+mkPostgresGargoyle :: FilePath -- ^ Path to `pg_ctl`
+                   -> (FilePath -> FilePath -> IO ()) -- ^ Shutdown function
+                   -> Gargoyle FilePath ByteString
                    -- ^ The 'Gargoyle' returned provides to client code the connection
                    -- string that can be used to connect to the PostgreSQL server
-mkPostgresGargoyle initdbPath postgresPath shutdownFun = Gargoyle
+mkPostgresGargoyle pgCtlPath shutdownFun = Gargoyle
   { _gargoyle_exec = "gargoyle-postgres-monitor"
-  , _gargoyle_init = initLocalPostgres initdbPath
-  , _gargoyle_start = startLocalPostgres postgresPath
-  , _gargoyle_stop = shutdownFun
+  , _gargoyle_init = initLocalPostgres pgCtlPath
+  , _gargoyle_start = startLocalPostgres pgCtlPath
+  , _gargoyle_stop = shutdownFun pgCtlPath
   , _gargoyle_getInfo = getLocalPostgresConnectionString
   }
 
 -- | Create a new PostgreSQL database in a local folder. This is a low level function used to
 -- define the PostgreSQL 'Gargoyle'.
-initLocalPostgres :: FilePath -- ^ Path to PostgreSQL `initdb` executable
+initLocalPostgres :: FilePath -- ^ Path to PostgreSQL `pg_ctl` executable
                   -> FilePath -- ^ Path in which to initialize PostgreSQL Server
                   -> IO ()
 initLocalPostgres binPath dbDir = do
   (_, _, _, initdb) <- createProcess (proc binPath
-    [ "-D", dbDir
-    , "-U", "postgres"
-    , "--no-locale"
-    , "-E", "UTF8"
+    [ "init"
+    , "-D", dbDir
+    , "-o", escapeMany
+      [ "-U", "postgres"
+      , "--no-locale"
+      , "-E", "UTF8"
+      ]
     ]) { std_in = NoStream, std_out = NoStream, std_err = Inherit }
   r <- waitForProcess initdb
   case r of
@@ -74,53 +73,65 @@ getLocalPostgresConnectionString dbDir = do
 
 -- | Start a postgres server that is assumed to be in the given folder. This is a low level function
 -- used to define the PostgreSQL 'Gargoyle'
-startLocalPostgres :: FilePath -- ^ Path to PostgreSQL `postgres` executable
+startLocalPostgres :: FilePath -- ^ Path to PostgreSQL `pg_ctl` executable
                    -> FilePath -- ^ Path where the server to start is located
-                   -> IO ProcessHandle -- ^ handle of the PostgreSQL server
+                   -> IO FilePath -- ^ handle of the PostgreSQL server
 startLocalPostgres binPath dbDir = do
-  version <- readProcess binPath ["--version"] ""
-  let processLog = case L.stripPrefix "postgres (PostgreSQL) " version of
-        Nothing -> fail $ "startLocalPostgres: failed to get version from: " <> version
-        Just v
-          -- PostgreSQL 10 logs look like
-          -- 2018-04-24 19:48:26.415 BST [17111] LOG:  listening on Unix socket ...
-          | takeWhile (/= '.') v == "10" -> drop 2 . dropWhile (/= ']')
-          | takeWhile (/= '.') v == "9" -> id
-          | otherwise -> fail $ "startLocalPostgres: unsupported postgres version: " <> v
   absoluteDbDir <- makeAbsolute dbDir
-  (_, _, err, postgres) <- runInteractiveProcess binPath
-    [ "-h", ""
+  (_, _, _, postgres) <- createProcess (proc binPath
+    [ "start"
     , "-D", absoluteDbDir
-    , "-k", absoluteDbDir
-    ] Nothing Nothing
-  fix $ \loop -> do
-    l <- hGetLine err
-    let (tag, rest) = span (/= ':') $ processLog l
-    when (tag == "HINT") loop
-    when (tag /= "LOG") $ fail $ "startLocalPostgres: Unexpected output from postgres: " <> show l
-    when (rest /= ":  database system is ready to accept connections") loop
-  return postgres
+    , "-w"
+    , "-o", escapeMany
+      [ "-h", ""
+      , "-k", absoluteDbDir
+      ]
+    ]) { std_in = NoStream, std_out = CreatePipe, std_err = Inherit }
+  r <- waitForProcess postgres
+  case r of
+    ExitSuccess -> return absoluteDbDir
+    _ -> do
+      putStrLn $ "startLocalPostgres failed: " <> show r
+      exitWith r
 
 -- | Perform a "Smart Shutdown" of Postgres;
 -- see http://www.postgresql.org/docs/current/static/server-shutdown.html
-shutdownPostgresSmart :: ProcessHandle -- ^ handle of the PostgreSQL server
+shutdownPostgresSmart :: FilePath -- ^ Path to PostgreSQL `pg_ctl` executable
+                      -> FilePath -- ^ Path where the server to start is located
                       -> IO ()
-shutdownPostgresSmart postgres = do
-  terminateProcess postgres
-  _ <- waitForProcess postgres
-  return ()
+shutdownPostgresSmart = shutdownPostgresWithMode "smart"
 
 -- | Perform a "Fast Shutdown" of Postgres;
 -- see http://www.postgresql.org/docs/current/static/server-shutdown.html
-shutdownPostgresFast :: ProcessHandle -- ^ handle of the PostgreSQL server
-                     -> IO ()
-shutdownPostgresFast postgres = do
-  withProcessHandle postgres $ \p -> do
-    case p of
-      ClosedHandle _ -> return ()
-      OpenHandle h -> signalProcess sigINT h
-  _ <- waitForProcess postgres
-  return ()
+shutdownPostgresFast :: FilePath -- ^ Path to PostgreSQL `pg_ctl` executable
+                      -> FilePath -- ^ Path where the server to start is located
+                      -> IO ()
+shutdownPostgresFast = shutdownPostgresWithMode "fast"
+
+-- | Perform a "Immediate Shutdown" of Postgres;
+-- see http://www.postgresql.org/docs/current/static/server-shutdown.html
+shutdownPostgresImmediate :: FilePath -- ^ Path to PostgreSQL `pg_ctl` executable
+                      -> FilePath -- ^ Path where the server to start is located
+                      -> IO ()
+shutdownPostgresImmediate = shutdownPostgresWithMode "immediate"
+
+shutdownPostgresWithMode :: String -- ^ The shutdown mode to execute; see https://www.postgresql.org/docs/9.5/app-pg-ctl.html
+                         -> FilePath -- ^ Path to PostgreSQL `pg_ctl` executable
+                         -> FilePath -- ^ Path where the server to start is located
+                         -> IO ()
+shutdownPostgresWithMode mode binPath absoluteDbDir = do
+  (_, _, _, postgres) <- createProcess (proc binPath
+    [ "stop"
+    , "-D", absoluteDbDir
+    , "-w"
+    , "-m", mode
+    ]) { std_in = NoStream, std_out = NoStream, std_err = Inherit }
+  r <- waitForProcess postgres
+  case r of
+    ExitSuccess -> return ()
+    _ -> do
+      putStrLn $ "stopLocalPostgres failed: " <> show r
+      exitWith r
 
 -- | Run `psql` against a Gargoyle managed db.
 psqlLocal :: Gargoyle pid ByteString -- ^ 'Gargoyle' against which to run
