@@ -106,7 +106,7 @@ withGargoyle g daemonDir b = do
                   threadDelay 500000 -- These are expensive ops so don't try too hard
                   acquire -- Try again
                 "ready" -> acquire
-                _ -> fail "Unexpected gargoyle message from monitor process"
+                _ -> fail $ "Unexpected gargoyle message from monitor process: " <> r
             | otherwise -> throwIO e
   bracket_ acquire (shutdown s ShutdownBoth >> close s) $
     b =<< _gargoyle_getInfo g (gWorkDir daemonDir)

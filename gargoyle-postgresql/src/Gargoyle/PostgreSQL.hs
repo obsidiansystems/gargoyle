@@ -44,6 +44,7 @@ initLocalPostgres :: FilePath -- ^ Path to PostgreSQL `pg_ctl` executable
                   -> FilePath -- ^ Path in which to initialize PostgreSQL Server
                   -> IO ()
 initLocalPostgres binPath dbDir = do
+  devNull <- openFile "/dev/null" WriteMode
   (_, _, _, initdb) <- createProcess (proc binPath
     [ "init"
     , "-D", dbDir
@@ -52,7 +53,7 @@ initLocalPostgres binPath dbDir = do
       , "--no-locale"
       , "-E", "UTF8"
       ]
-    ]) { std_in = NoStream, std_out = NoStream, std_err = Inherit }
+    ]) { std_in = NoStream, std_out = UseHandle devNull, std_err = Inherit }
   r <- waitForProcess initdb
   case r of
     ExitSuccess -> return ()
@@ -78,6 +79,7 @@ startLocalPostgres :: FilePath -- ^ Path to PostgreSQL `pg_ctl` executable
                    -> IO FilePath -- ^ handle of the PostgreSQL server
 startLocalPostgres binPath dbDir = do
   absoluteDbDir <- makeAbsolute dbDir
+  devNull <- openFile "/dev/null" WriteMode
   (_, _, _, postgres) <- createProcess (proc binPath
     [ "start"
     , "-D", absoluteDbDir
@@ -86,7 +88,7 @@ startLocalPostgres binPath dbDir = do
       [ "-h", ""
       , "-k", absoluteDbDir
       ]
-    ]) { std_in = NoStream, std_out = CreatePipe, std_err = Inherit }
+    ]) { std_in = NoStream, std_out = UseHandle devNull, std_err = Inherit }
   r <- waitForProcess postgres
   case r of
     ExitSuccess -> return absoluteDbDir
