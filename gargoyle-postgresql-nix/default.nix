@@ -3,7 +3,7 @@
 }:
 mkDerivation {
   pname = "gargoyle-postgresql-nix";
-  version = "0.1";
+  version = "0.2";
   src = ./.;
   isLibrary = true;
   isExecutable = true;
@@ -11,7 +11,7 @@ mkDerivation {
     base bytestring gargoyle gargoyle-postgresql process shelly
     template-haskell text
   ];
-  executableHaskellDepends = [ base gargoyle postgresql ];
+  executableHaskellDepends = [ base gargoyle postgresql gargoyle-postgresql ];
   description = "Manage PostgreSQL servers with gargoyle and nix";
   license = stdenv.lib.licenses.unfree;
 }
