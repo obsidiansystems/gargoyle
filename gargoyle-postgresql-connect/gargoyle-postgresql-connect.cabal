@@ -17,6 +17,7 @@ library
                , gargoyle-postgresql
                , gargoyle-postgresql-nix
                , groundhog
+               , groundhog-postgresql
                , postgresql-simple
                , resource-pool
   hs-source-dirs: src
