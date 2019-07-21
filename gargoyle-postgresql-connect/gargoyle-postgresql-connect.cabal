@@ -3,6 +3,8 @@ version: 0.1
 author: Obsidian Systems LLC
 maintainer: maintainer@obsidian.systems
 copyright: Copyright (C) 2019 Obsidian Systems LLC
+license: BSD3
+license-file: LICENSE
 build-type: Simple
 cabal-version: >=1.10
 synopsis: Connect to gargoyle-managed postgresql instances
