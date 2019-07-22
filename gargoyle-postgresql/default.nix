@@ -1,14 +1,14 @@
-{ mkDerivation, base, bytestring, directory, gargoyle, process
+{ mkDerivation, base, bytestring, directory, gargoyle, posix-escape, process
 , stdenv, stringsearch, text, unix, postgresql
 }:
 mkDerivation {
   pname = "gargoyle-postgresql";
-  version = "0.1";
+  version = "0.2";
   src = ./.;
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    base bytestring directory gargoyle process stringsearch text unix
+    base bytestring directory gargoyle posix-escape process stringsearch text unix
   ];
   executableHaskellDepends = [
     base bytestring gargoyle process text unix

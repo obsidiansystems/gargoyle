@@ -25,3 +25,4 @@ prebuild
 static/assets
 db
 *.jsexe
+cabal.project.local

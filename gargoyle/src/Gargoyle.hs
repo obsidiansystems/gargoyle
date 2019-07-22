@@ -106,7 +106,7 @@ withGargoyle g daemonDir b = do
                   threadDelay 500000 -- These are expensive ops so don't try too hard
                   acquire -- Try again
                 "ready" -> acquire
-                _ -> fail "Unexpected gargoyle message from monitor process"
+                _ -> fail $ "Unexpected gargoyle message from monitor process: " <> r
             | otherwise -> throwIO e
   bracket_ acquire (shutdown s ShutdownBoth >> close s) $
     b =<< _gargoyle_getInfo g (gWorkDir daemonDir)
@@ -170,6 +170,7 @@ gargoyleMain g = void $ forkProcess $ do
     shutdownVar <- newEmptyMVar
     void $ forkOS $ forever $ do
       (s, _) <- accept controlSocket
+      acceptThread <- myThreadId
       --TODO: What happens if we decide we're shutting down here?
       modifyMVar_ numClientsVar $ \n -> do
         return $ succ n
@@ -186,6 +187,8 @@ gargoyleMain g = void $ forkProcess $ do
           case pred n of
             0 -> do
               shutdown controlSocket ShutdownBoth
+              -- We have to explicitly kill the accept thread, because otherwise (sometimes?) 'accept' will begin returning EAGAIN, and ghc will continuously retry it.  This busywait consumes 100% of CPU, prevents the monitor from actually exiting, and leaves the control socket and lock file in a state where another monitor can't be started.
+              killThread acceptThread
               putMVar shutdownVar ()
             n' -> putMVar numClientsVar n'
     bracket (_gargoyle_start g (gWorkDir daemonDir)) (_gargoyle_stop g) $ \_ -> do
