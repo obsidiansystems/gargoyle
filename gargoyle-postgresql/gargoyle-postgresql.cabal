@@ -43,7 +43,7 @@ library
   build-depends: base >= 4.9 && < 4.12
                , bytestring == 0.10.*
                , directory == 1.3.*
-               , gargoyle == 0.1.1
+               , gargoyle == 0.1.*
                , posix-escape == 0.1.*
                , process >= 1.4 && < 1.7
                , stringsearch == 0.3.*

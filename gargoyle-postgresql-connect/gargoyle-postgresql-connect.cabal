@@ -16,8 +16,8 @@ library
                , bytestring
                , directory
                , gargoyle == 0.1.1
-               , gargoyle-postgresql == 0.2
-               , gargoyle-postgresql-nix == 0.2
+               , gargoyle-postgresql
+               , gargoyle-postgresql-nix
                , groundhog
                , postgresql-simple
                , resource-pool
