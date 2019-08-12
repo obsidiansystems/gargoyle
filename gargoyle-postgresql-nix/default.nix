@@ -11,7 +11,7 @@ mkDerivation {
     base bytestring gargoyle gargoyle-postgresql process shelly
     template-haskell text
   ];
-  executableHaskellDepends = [ base gargoyle postgresql gargoyle-postgresql ];
+  executableHaskellDepends = [ base gargoyle gargoyle-postgresql ];
   description = "Manage PostgreSQL servers with gargoyle and nix";
   license = stdenv.lib.licenses.unfree;
 }
