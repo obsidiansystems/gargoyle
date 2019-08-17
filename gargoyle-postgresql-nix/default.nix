@@ -16,5 +16,5 @@ mkDerivation {
   ];
   executableHaskellDepends = [ base gargoyle gargoyle-postgresql ];
   description = "Manage PostgreSQL servers with gargoyle and nix";
-  license = stdenv.lib.licenses.unfree;
+  license = stdenv.lib.licenses.bsd3;
 }
