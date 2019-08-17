@@ -1,6 +1,6 @@
 haskellPackages: rec {
-  gargoyle = haskellPackages.callPackage ./gargoyle {};
-  gargoyle-postgresql = haskellPackages.callPackage ./gargoyle-postgresql { inherit gargoyle; };
-  gargoyle-postgresql-nix = haskellPackages.callPackage ./gargoyle-postgresql-nix { inherit gargoyle gargoyle-postgresql; };
-  gargoyle-postgresql-connect = haskellPackages.callPackage ./gargoyle-postgresql-connect { inherit gargoyle gargoyle-postgresql gargoyle-postgresql-nix; };
+  gargoyle = haskellPackages.callCabal2nix "gargoyle" ./gargoyle {};
+  gargoyle-postgresql = haskellPackages.callCabal2nix "gargoyle-postgresql" ./gargoyle-postgresql { };
+  gargoyle-postgresql-nix = haskellPackages.callPackage ./gargoyle-postgresql-nix { };
+  gargoyle-postgresql-connect = haskellPackages.callCabal2nix "gargoyle-postgresql-connect" ./gargoyle-postgresql-connect { };
 }
