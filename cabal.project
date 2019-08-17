@@ -2,3 +2,4 @@ packages:
     gargoyle/
     gargoyle-postgresql/
     gargoyle-postgresql-nix/
+    gargoyle-postgresql-connect/

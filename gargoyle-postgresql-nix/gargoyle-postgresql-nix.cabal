@@ -3,6 +3,7 @@ version: 0.2
 author: Obsidian Systems LLC
 maintainer: maintainer@obsidian.systems
 copyright: Copyright (C) 2017 Obsidian Systems LLC
+license: BSD3
 build-type: Simple
 cabal-version: >=1.10
 synopsis: Manage PostgreSQL servers with gargoyle and nix
