@@ -130,6 +130,7 @@ gargoyleMain g = void $ forkProcess $ do
     | isAlreadyInUseError e -> return ()
     | isDoesNotExistError e -> throwIO e -- this means it's not a file but it exists
     | isPermissionError e -> throwIO e -- the daemon directory is in a bad state
+    | otherwise -> throwIO e
   -- The daemon tries to hold on to the lock file for its lifetime, signaling that it is
   -- accepting connections.
   lock <- tryLockFile lockPath Exclusive >>= \case
