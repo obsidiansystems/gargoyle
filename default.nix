@@ -1,4 +1,4 @@
-haskellPackages: rec {
+haskellPackages: {
   which = haskellPackages.callHackageDirect {
     pkg = "which";
     ver = "0.1.0.0";
