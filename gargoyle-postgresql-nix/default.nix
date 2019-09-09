@@ -1,20 +1,4 @@
-{ mkDerivation, base, bytestring, gargoyle, gargoyle-postgresql
-, process, shelly, stdenv, template-haskell, text, postgresql, which
-}:
-mkDerivation {
-  pname = "gargoyle-postgresql-nix";
-  version = "0.2";
-  src = ./.;
-  isLibrary = true;
-  isExecutable = true;
-  libraryHaskellDepends = [
-    base bytestring gargoyle gargoyle-postgresql process shelly
-    template-haskell text which
-  ];
-  librarySystemDepends = [
-    postgresql
-  ];
-  executableHaskellDepends = [ base gargoyle gargoyle-postgresql ];
-  description = "Manage PostgreSQL servers with gargoyle and nix";
-  license = stdenv.lib.licenses.bsd3;
-}
+haskellPackages: nixpkgs:
+  nixpkgs.haskell.lib.overrideCabal (haskellPackages.callCabal2nix "gargoyle-postgresql-nix" ./. { }) (drv: {
+    librarySystemDepends = (drv.librarySystemDepends or []) ++ [ nixpkgs.postgresql ];
+  })
