@@ -7,6 +7,9 @@ haskellPackages: nixpkgs: rec {
 
   gargoyle = haskellPackages.callCabal2nix "gargoyle" ./gargoyle {};
   gargoyle-postgresql = haskellPackages.callCabal2nix "gargoyle-postgresql" ./gargoyle-postgresql { };
-  gargoyle-postgresql-nix = import ./gargoyle-postgresql-nix haskellPackages nixpkgs;
+  gargoyle-postgresql-nix = haskellPackages.callPackage ({ pkgs, postgresql }:
+    pkgs.haskell.lib.overrideCabal (haskellPackages.callCabal2nix "gargoyle-postgresql-nix" ./gargoyle-postgresql-nix { }) (drv: {
+      librarySystemDepends = (drv.librarySystemDepends or []) ++ [ postgresql ];
+    })) {};
   gargoyle-postgresql-connect = haskellPackages.callCabal2nix "gargoyle-postgresql-connect" ./gargoyle-postgresql-connect { };
 }
