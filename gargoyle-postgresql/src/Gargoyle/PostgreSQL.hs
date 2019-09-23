@@ -5,6 +5,7 @@ import Control.Monad
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Search as BS
+import Data.Foldable (for_)
 import Data.Maybe
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
@@ -158,3 +159,27 @@ psqlLocal g psqlPath dbPath minput = withGargoyle g dbPath $ \dbUri -> do
     Just input -> hPutStrLn (fromJust mStdin) (input ++ "\n\\q")
   ExitSuccess <- waitForProcess psql
   return ()
+
+-- | Run an arbitrary process against a Gargoyle-managed DB, providing connection
+--   information by substituting a given argument pattern with the connection string.
+runPgLocalWithSubstitution
+  :: Gargoyle pid ByteString -- ^ 'Gargoyle' against which to run
+  -> FilePath -- ^ The path where the managed daemon is expected
+  -> FilePath -- ^ Path to process to run
+  -> (String -> [String]) -- ^ Function producing arguments to the process given the connection string
+  -> Maybe String -- ^ Optionally provide stdin input instead of an inheriting current stdin.
+  -> IO ExitCode
+runPgLocalWithSubstitution g dbPath procPath mkProcArgs mInput = withGargoyle g dbPath $ \dbUri -> do
+  void $ installHandler keyboardSignal Ignore Nothing
+  let
+    procSpec = (proc procPath $ mkProcArgs $ T.unpack $ T.decodeUtf8 dbUri)
+      { std_in = case mInput of
+          Nothing -> Inherit
+          Just _ -> CreatePipe
+      , std_out = Inherit
+      , std_err = Inherit
+      }
+  withCreateProcess procSpec $ \mStdin _ _ procHandle -> do
+    for_ mInput $
+      hPutStrLn (fromMaybe (error "runPgLocalWithSubstitution: input stream was expected") mStdin)
+    waitForProcess procHandle
