@@ -18,3 +18,11 @@ haskellPackages.override {
     };
 }
 ```
+
+# Hacking
+
+Do something like this:
+
+```shell
+nix-shell -A gargoyle-postgresql.env --run 'cd gargoyle-postgresql && cabal new-repl'
+```
