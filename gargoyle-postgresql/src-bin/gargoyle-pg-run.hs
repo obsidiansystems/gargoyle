@@ -17,7 +17,7 @@ main = do
       putStrLn $ unwords [ "USAGE:", pname, "<path>", "<command>", "[...<arguments>]" ]
       putStrLn "\t<path>: path to local db"
       putStrLn "\t<command>: command to run"
-      putStrLn "\t<arguments>: list of arguments to <command> where the special argument '{}' is expandend into a connection string; if <arguments> is empty, '{}' will be supplied as the only argument by default"
+      putStrLn "\t<arguments>: list of arguments to <command> where the special argument '{}' is expanded into a connection string; if <arguments> is empty, '{}' will be supplied as the only argument by default"
       exitFailure
   where
     substArgs conn = map (\x -> if x == "{}" then conn else x)
