@@ -33,6 +33,7 @@ withDb' dbPath f = do
     -- use the file contents as the URI for an existing server
     then C8.readFile dbPath >>= \b -> case C8.lines b of
       [] -> error "DB connection string configuration file is empty"
+      -- TODO: Consider also blowing up if more than one line for next breaking release
       x:_ -> f x
     -- otherwise assume it's a folder for a local database
     else do
