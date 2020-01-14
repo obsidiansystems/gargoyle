@@ -1,4 +1,4 @@
-{ pkgs ? import <nixpkgs> {}
+{ pkgs ? import dep/nixpkgs {}
 , haskellPackages ? pkgs.haskellPackages
 , ...
 }:
