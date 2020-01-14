@@ -1,5 +1,5 @@
 { mkDerivation, base, bytestring, gargoyle, gargoyle-postgresql
-, process, shelly, stdenv, template-haskell, text, postgresql
+, process, shelly, stdenv, template-haskell, text, postgresql, which
 }:
 mkDerivation {
   pname = "gargoyle-postgresql-nix";
@@ -9,7 +9,7 @@ mkDerivation {
   isExecutable = true;
   libraryHaskellDepends = [
     base bytestring gargoyle gargoyle-postgresql process shelly
-    template-haskell text
+    template-haskell text which
   ];
   librarySystemDepends = [
     postgresql

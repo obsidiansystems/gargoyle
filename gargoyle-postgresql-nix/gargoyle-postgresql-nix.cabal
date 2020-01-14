@@ -36,6 +36,7 @@ executable gargoyle-nix-psql
   build-depends: base
                , gargoyle-postgresql
                , gargoyle-postgresql-nix
+               , which
 
 executable gargoyle-nix-postgres-monitor
   main-is: gargoyle-nix-postgres-monitor.hs
