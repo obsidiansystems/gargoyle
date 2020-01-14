@@ -1,4 +1,4 @@
-module Gargoyle.PostgreSQL.Connect (withDb, withDb', openDb) where
+module Gargoyle.PostgreSQL.Connect (openDb, withDb, withDb', withDbPath) where
 
 import Control.Monad ((>=>))
 import Data.ByteString (ByteString)
@@ -40,3 +40,10 @@ withDb' dbPath f = do
     else do
       g <- postgresNix
       Right <$> withGargoyle g dbPath f
+
+-- | Like 'withDb'' but only connects to an existing PostgreSQL database
+-- at the given 'FilePath'.
+withDbPath :: FilePath -> (ByteString -> IO a) -> IO a
+withDbPath dbPath f = do
+  g <- postgresNix
+  withGargoyle g dbPath f
