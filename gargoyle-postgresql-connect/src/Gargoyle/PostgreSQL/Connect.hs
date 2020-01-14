@@ -10,11 +10,12 @@ import Gargoyle.PostgreSQL.Nix (postgresNix)
 import System.Directory (doesFileExist)
 
 
--- Like 'withDb'' but turns the connection string into a connection 'Pool' for you.
+-- | Like 'withDb'' but turns the connection string into a connection
+-- 'Pool' for you and using 'error' on failure.
 withDb :: String -> (Pool Connection -> IO a) -> IO a
-withDb dbPath f = withDb' dbPath (openDb >=> f)
+withDb dbPath f = either error pure =<< withDb' dbPath (openDb >=> f)
 
--- Convert a connection string into a connection 'Pool'.
+-- | Convert a connection string into a connection 'Pool'.
 openDb :: ByteString -> IO (Pool Connection)
 openDb dbUri = createPool (connectPostgreSQL dbUri) close 1 5 20
 
@@ -26,16 +27,16 @@ openDb dbUri = createPool (connectPostgreSQL dbUri) close 1 5 20
 -- function that returns database connection information as arguments in
 -- order to open and start the database. Otherwise, it will create the
 -- database for you if it doesn't exist.
-withDb' :: String -> (ByteString -> IO a) -> IO a
+withDb' :: String -> (ByteString -> IO a) -> IO (Either String a)
 withDb' dbPath f = do
   dbExists <- doesFileExist dbPath
   if dbExists
     -- use the file contents as the URI for an existing server
     then C8.readFile dbPath >>= \b -> case C8.lines b of
-      [] -> error "DB connection string configuration file is empty"
+      [] -> pure $ Left "DB connection string configuration file is empty"
       -- TODO: Consider also blowing up if more than one line for next breaking release
-      x:_ -> f x
+      x:_ -> Right <$> f x
     -- otherwise assume it's a folder for a local database
     else do
       g <- postgresNix
-      withGargoyle g dbPath f
+      Right <$> withGargoyle g dbPath f
