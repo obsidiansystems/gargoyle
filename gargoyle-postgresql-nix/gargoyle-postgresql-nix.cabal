@@ -1,5 +1,5 @@
 name: gargoyle-postgresql-nix
-version: 0.2
+version: 0.3
 author: Obsidian Systems LLC
 maintainer: maintainer@obsidian.systems
 copyright: Copyright (C) 2017 Obsidian Systems LLC
