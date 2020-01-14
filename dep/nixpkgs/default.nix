@@ -1,8 +1,8 @@
-let
-  fetchFromGitHub = if (builtins ? "fetchTarball")
-    then { owner, repo, rev, sha256 }: builtins.fetchTarball {
-        inherit sha256;
-        url = "https://github.com/${owner}/${repo}/archive/${rev}.tar.gz";
-      }
-    else (import <nixpkgs> {}).fetchFromGitHub;
-in import (fetchFromGitHub (builtins.fromJSON (builtins.readFile ./github.json)))
+# DO NOT HAND-EDIT THIS FILE
+let fetch = { private ? false, fetchSubmodules ? false, owner, repo, rev, sha256, ... }:
+  if !fetchSubmodules && !private then builtins.fetchTarball {
+    url = "https://github.com/${owner}/${repo}/archive/${rev}.tar.gz"; inherit sha256;
+  } else (import <nixpkgs> {}).fetchFromGitHub {
+    inherit owner repo rev sha256 fetchSubmodules private;
+  };
+in import (fetch (builtins.fromJSON (builtins.readFile ./github.json)))
