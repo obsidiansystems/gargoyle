@@ -7,16 +7,22 @@ To use Gargoyle the client must:
 * Create an executable whose `main` is `gargoyleMain`. The name of this executable should match the executable name specified in the `_gargoyle_exec` field of the `Gargoyle`.
 * The client will run their code with `withGargoyle` to gain access to the daemon.
 
-# Importing into nixpkgs:
+# Importing into Haskell package set
 
 ```nix
 haskellPackages.override {
   overrides = self: super:
-    let gargoylePkgs = import ./path/to/gargoyle self;
-    in {
-      inherit (gargoylePkgs) gargoyle gargoyle-postgresql gargoyle-postgresql-nix gargoyle-postgresql-connect;
+    let gargoylePkgs = import ./path/to/gargoyle-repo { haskellPackages = self; };
+    in gargoylePkgs // {
+      # .. your overrides
     };
 }
+```
+
+By default `gargoyle-postgresql-nix` will use the `postgresql` of the `pkgs` used by your `haskellPackages`. To override this, pass `postgresql` by changing the above line to look more like
+
+```nix
+gargoylePkgs = import ./path/to/gargoyle-repo { haskellPackages = self; postgresql = myCustomVersion; }
 ```
 
 # Hacking

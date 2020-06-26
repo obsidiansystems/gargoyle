@@ -2,4 +2,4 @@
 , haskellPackages ? pkgs.haskellPackages
 , ...
 }:
-haskellPackages.extend (self: super: import ./. self)
+haskellPackages.extend (self: super: import ./. { haskellPackages = self; })
