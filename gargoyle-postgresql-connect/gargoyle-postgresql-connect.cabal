@@ -15,7 +15,7 @@ library
   build-depends: base
                , bytestring
                , directory
-               , gargoyle == 0.1.1
+               , gargoyle == 0.2
                , gargoyle-postgresql
                , gargoyle-postgresql-nix
                , postgresql-simple

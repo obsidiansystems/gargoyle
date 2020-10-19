@@ -1,7 +1,7 @@
 { nixpkgs ? import ./dep/nixpkgs {} }:
 let
   haskellPackages = nixpkgs.haskellPackages.override {
-    overrides = self: super: (import ./. self super) // {
+    overrides = self: super: (import ./. {} self super) // {
       which = haskellPackages.callHackageDirect {
         pkg = "which";
         ver = "0.1.0.0";
