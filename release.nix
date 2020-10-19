@@ -14,5 +14,6 @@ in {
     gargoyle
     gargoyle-postgresql
     gargoyle-postgresql-nix
+    gargoyle-postgresql-nix-monitor
     gargoyle-postgresql-connect;
 }

@@ -1,0 +1,5 @@
+packages:
+  ../gargoyle/
+  ../gargoyle-postgresql/
+  ../gargoyle-postgresql-nix/
+  ./
