@@ -4,4 +4,4 @@ import Gargoyle
 import Gargoyle.PostgreSQL
 
 main :: IO ()
-main = gargoyleMain defaultPostgres
+main = gargoyleMain defaultPostgresMonitor

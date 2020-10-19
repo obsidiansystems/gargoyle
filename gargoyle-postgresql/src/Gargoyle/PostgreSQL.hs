@@ -18,25 +18,35 @@ import System.Process
 
 import Gargoyle
 
--- | A 'Gargoyle' that assumes `initdb` and `postgres` are in the path and
+-- | A 'Gargoyle' that assumes `pg_ctl` is in the path and
 -- will perform a 'fast shutdown' on termination (see below).
-defaultPostgres :: Gargoyle FilePath ByteString
-defaultPostgres = mkPostgresGargoyle "pg_ctl" shutdownPostgresFast
+defaultPostgres :: Gargoyle ByteString
+defaultPostgres = mkPostgresGargoyle "pg_ctl"
+
+-- | A 'GargoyleMonitor' that assumes `pg_ctl` is on the path
+defaultPostgresMonitor :: GargoyleMonitor FilePath
+defaultPostgresMonitor = mkPostgresGargoyleMonitor "pg_ctl" shutdownPostgresFast
 
 -- | Create a gargoyle by telling it where the relevant PostgreSQL executables are and
 -- what it should do in order to shut down the server. This module provides two options:
 -- 'shutdownPostgresSmart' and 'shutdownPostgresFast'.
 mkPostgresGargoyle :: FilePath -- ^ Path to `pg_ctl`
-                   -> (FilePath -> FilePath -> IO ()) -- ^ Shutdown function
-                   -> Gargoyle FilePath ByteString
+                   -> Gargoyle ByteString
                    -- ^ The 'Gargoyle' returned provides to client code the connection
                    -- string that can be used to connect to the PostgreSQL server
-mkPostgresGargoyle pgCtlPath shutdownFun = Gargoyle
+mkPostgresGargoyle pgCtlPath = Gargoyle
   { _gargoyle_exec = "gargoyle-postgres-monitor"
   , _gargoyle_init = initLocalPostgres pgCtlPath
-  , _gargoyle_start = startLocalPostgres pgCtlPath
-  , _gargoyle_stop = shutdownFun pgCtlPath
   , _gargoyle_getInfo = getLocalPostgresConnectionString
+  }
+
+mkPostgresGargoyleMonitor
+  :: FilePath -- ^ Path to `pg_ctl`
+  -> (FilePath -> FilePath -> IO ()) -- ^ Shutdown function
+  -> GargoyleMonitor FilePath
+mkPostgresGargoyleMonitor pgCtlPath shutdownFun = GargoyleMonitor
+  { _gargoyleMonitor_start = startLocalPostgres pgCtlPath
+  , _gargoyleMonitor_stop = shutdownFun pgCtlPath
   }
 
 -- | Create a new PostgreSQL database in a local folder. This is a low level function used to
@@ -137,7 +147,7 @@ shutdownPostgresWithMode mode binPath absoluteDbDir = do
       exitWith r
 
 -- | Run `psql` against a Gargoyle managed db.
-psqlLocal :: Gargoyle pid ByteString -- ^ 'Gargoyle' against which to run
+psqlLocal :: Gargoyle ByteString -- ^ 'Gargoyle' against which to run
           -> FilePath -- ^ The path to `psql`
           -> FilePath -- ^ The path where the managed daemon is expected
           -> Maybe String
@@ -163,7 +173,7 @@ psqlLocal g psqlPath dbPath minput = withGargoyle g dbPath $ \dbUri -> do
 -- | Run an arbitrary process against a Gargoyle-managed DB, providing connection
 --   information by substituting a given argument pattern with the connection string.
 runPgLocalWithSubstitution
-  :: Gargoyle pid ByteString -- ^ 'Gargoyle' against which to run
+  :: Gargoyle ByteString -- ^ 'Gargoyle' against which to run
   -> FilePath -- ^ The path where the managed daemon is expected
   -> FilePath -- ^ Path to process to run
   -> (String -> [String]) -- ^ Function producing arguments to the process given the connection string

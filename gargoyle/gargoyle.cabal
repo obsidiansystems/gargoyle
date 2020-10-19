@@ -1,5 +1,5 @@
 name: gargoyle
-version: 0.1.1
+version: 0.2
 license: BSD3
 license-file: LICENSE
 author: Obsidian Systems LLC
@@ -17,6 +17,9 @@ description:
   1. Define a value of the 'Gargoyle' type which specifies how to administer the daemon.
   2. Create an executable whose `main` is 'gargoyleMain'. The name of this executable should match the executable name specified in the '_gargoyle_exec' field of the 'Gargoyle'.
   3. The client will run their code with 'withGargoyle' to gain access to the daemon.
+
+extra-source-files:
+  ChangeLog.md
 
 library
   exposed-modules: Gargoyle

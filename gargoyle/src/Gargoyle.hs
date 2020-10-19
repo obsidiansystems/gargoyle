@@ -6,6 +6,7 @@
 module Gargoyle
   ( Gargoyle (..)
   , withGargoyle
+  , GargoyleMonitor (..)
   , gargoyleMain
   ) where
 
@@ -25,20 +26,23 @@ import System.Process
 
 import Debug.Trace
 
-data Gargoyle pid a = Gargoyle
+data Gargoyle a = Gargoyle
   { _gargoyle_exec :: FilePath
     -- ^ The path to the executable created with 'gargoyleMain' which will serve as the daemon
     -- monitor process.
   , _gargoyle_init :: FilePath -> IO ()
     -- ^ The action to run in order to populate the daemon's environment for the first run.
-  , _gargoyle_start :: FilePath -> IO pid
-    -- ^ The action to run in order to spin up the daemon on every run. This happens after
-    -- '_gargoyle_init' if it also runs.
-  , _gargoyle_stop :: pid -> IO ()
-    -- ^ The action to run when the monitor process detects that no clients are connected anymore.
   , _gargoyle_getInfo :: FilePath -> IO a
     -- ^ Run a command which knows about the working directory of the daemon to collect runtime
     -- information to pass to client code in 'withGargoyle'.
+  }
+
+data GargoyleMonitor pid = GargoyleMonitor
+  { _gargoyleMonitor_start :: FilePath -> IO pid
+    -- ^ The action to run in order to spin up the daemon on every run. This happens after
+    -- '_gargoyle_init' if it also runs.
+  , _gargoyleMonitor_stop :: pid -> IO ()
+    -- ^ The action to run when the monitor process detects that no clients are connected anymore.
   }
 
 gControlDir :: FilePath -> FilePath
@@ -62,7 +66,7 @@ checkThreadedRuntime = when (not rtsSupportsBoundThreads) $ do
 -- stopped when no clients remain. If the daemon has not yet been initialized, it will be.
 -- The counterpart of this function is 'gargoyleMain' which should be used to produce an executable
 -- that will monitor the daemon's status.
-withGargoyle :: Gargoyle pid a -- ^ Description of how to manage the daemon.
+withGargoyle :: Gargoyle a -- ^ Description of how to manage the daemon.
              -> FilePath -- ^ The directory where the daemon should be initialized.
              -> (a -> IO b)
                 -- ^ Client action which has access to runtime information provided by
@@ -116,7 +120,7 @@ withGargoyle g daemonDir b = do
 -- in the specified location. This function should be used as the main function of an executable
 -- which will then be invoked by calling 'withGargoyle' in the client code to monitor
 -- the daemon's status.
-gargoyleMain :: Gargoyle pid a
+gargoyleMain :: GargoyleMonitor pid
              -- ^ Description of how to initialize, spin up, and spin down a daemon.
              -> IO () -- ^ Returns only when all clients have disconnected.
 gargoyleMain g = void $ forkProcess $ do
@@ -192,7 +196,7 @@ gargoyleMain g = void $ forkProcess $ do
               killThread acceptThread
               putMVar shutdownVar ()
             n' -> putMVar numClientsVar n'
-    bracket (_gargoyle_start g (gWorkDir daemonDir)) (_gargoyle_stop g) $ \_ -> do
+    bracket (_gargoyleMonitor_start g (gWorkDir daemonDir)) (_gargoyleMonitor_stop g) $ \_ -> do
       hSetBuffering stdout LineBuffering
       putStrLn "ready" -- Signal to the invoker that we're ready
       takeMVar shutdownVar
