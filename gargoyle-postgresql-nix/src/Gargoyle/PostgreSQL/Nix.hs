@@ -7,17 +7,18 @@ import Data.ByteString (ByteString)
 import Gargoyle
 import Gargoyle.PostgreSQL
 
-import Paths_gargoyle_postgresql_nix
 import System.Which
 
 pgCtlPath :: FilePath
 pgCtlPath = $(staticWhich "pg_ctl")
 
+monitorPath :: FilePath
+monitorPath = $(staticWhich "gargoyle-nix-postgres-monitor")
+
 postgresNix :: IO (Gargoyle ByteString)
 postgresNix = do
-  bindir <- getBinDir
   return $ (mkPostgresGargoyle pgCtlPath)
-    { _gargoyle_exec = bindir <> "/gargoyle-nix-postgres-monitor"
+    { _gargoyle_exec = monitorPath
     }
 
 postgresNixMonitor :: GargoyleMonitor FilePath

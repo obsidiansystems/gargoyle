@@ -15,7 +15,6 @@ extra-source-files:
 
 library
   exposed-modules: Gargoyle.PostgreSQL.Nix
-  other-modules: Paths_gargoyle_postgresql_nix
   ghc-options: -Wall
   ghc-prof-options: -fprof-auto
   build-depends: base

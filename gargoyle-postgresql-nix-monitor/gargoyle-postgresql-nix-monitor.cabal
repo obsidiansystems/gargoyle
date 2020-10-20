@@ -17,4 +17,5 @@ executable gargoyle-nix-postgres-monitor
   default-language: Haskell2010
   build-depends: base
                , gargoyle
-               , gargoyle-postgresql-nix
+               , gargoyle-postgresql
+               , which
