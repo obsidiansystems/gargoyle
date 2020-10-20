@@ -8,7 +8,7 @@ let
             ver = "0.1.0.0";
             sha256 = "1c8svdiv378ps63lwn3aw7rv5wamlpmzgcn21r2pap4sx7p08892";
           } {};};
-        in lib.composeExtensions base (self: super: (import ./. self super {}));
+        in lib.composeExtensions base (import ./. {});
   };
 in {
   inherit (haskellPackages)
