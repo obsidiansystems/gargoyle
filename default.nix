@@ -8,11 +8,11 @@
     (drv: {
       librarySystemDepends = (drv.librarySystemDepends or []) ++ [ (if postgresql == null then pkgs.postgresql else postgresql) self.gargoyle-postgresql-nix-monitor ];
     });
-  gargoyle-postgresql-nix-monitor = justStaticExecutables (overrideCabal
+  gargoyle-postgresql-nix-monitor = overrideCabal
     (self.callCabal2nix "gargoyle-postgresql-nix-monitor" ./gargoyle-postgresql-nix-monitor {})
     (drv:{
       librarySystemDepends = (drv.librarySystemDepends or []) ++ [ (if postgresql == null then pkgs.postgresql else postgresql)];
-    }));
+    });
   gargoyle-postgresql-connect =
-    justStaticExecutables (self.callCabal2nix "gargoyle-postgresql-connect" ./gargoyle-postgresql-connect {});
+    self.callCabal2nix "gargoyle-postgresql-connect" ./gargoyle-postgresql-connect {};
 }
