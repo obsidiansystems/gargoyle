@@ -4,8 +4,8 @@ let
     overrides = self: super: import ./. { haskellPackages = self; } // {
       which = haskellPackages.callHackageDirect {
         pkg = "which";
-        ver = "0.1.0.0";
-        sha256 = "1c8svdiv378ps63lwn3aw7rv5wamlpmzgcn21r2pap4sx7p08892";
+        ver = "0.2";
+        sha256 = "sha256:1g795yq36n7c6ycs7c0799c3cw78ad0cya6lj4x08m0xnfx98znn";
       } {};
     };
   };
