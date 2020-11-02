@@ -1,12 +1,6 @@
 name: github-action
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the develop branch
-on:
-  push:
-    branches: [ develop ]
-  pull_request:
-    branches: [ develop ]
+on: [push, pull_request]
 
 jobs:
   build:
