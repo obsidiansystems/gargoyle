@@ -1,0 +1,27 @@
+name: github-action
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the develop branch
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        ghc: ['8.6.5', '8.8.4', 8.10.2]
+        cabal: ['3.0.0.0']
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+    name: Haskell GHC ${{ matrix.ghc }} sample
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Haskell
+        uses: actions/setup-haskell@v1.1
+        with:
+          ghc-version: ${{ matrix.ghc }}
+          cabal-version: ${{ matrix.cabal }}
+      - run: cabal build all
