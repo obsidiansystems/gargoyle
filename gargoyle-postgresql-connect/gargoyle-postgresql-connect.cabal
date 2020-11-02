@@ -1,5 +1,5 @@
 name:               gargoyle-postgresql-connect
-version:            0.1
+version:            0.1.0.0
 author:             Obsidian Systems LLC
 maintainer:         maintainer@obsidian.systems
 copyright:          Copyright (C) 2019 Obsidian Systems LLC
