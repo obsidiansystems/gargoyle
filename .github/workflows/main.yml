@@ -16,17 +16,26 @@ jobs:
         ghc: ['8.6.5', '8.8.4', 8.10.2]
         cabal: ['3.0.0.0']
         os: [ubuntu-latest]
-    name: Haskell GHC ${{ matrix.ghc }} sample
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup Haskell
-        uses: actions/setup-haskell@v1.1
-        with:
-          ghc-version: ${{ matrix.ghc }}
-          cabal-version: ${{ matrix.cabal }}
-      - run: |
-          sudo apt-get update
-          sudo apt-get install postgresql-10
-          export PATH=$PATH:/usr/lib/postgresql/10/bin
-          which pg_ctl
-          cabal build all
+    - name: Cache ~/.cabal/packages, ~/.cabal/store and dist-newstyle
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cabal/packages
+          ~/.cabal/store
+          dist-newstyle
+        key: ${{ runner.os }}-${{ matrix.ghc }}
+    - name: Haskell GHC ${{ matrix.ghc }} sample
+      steps:
+        - uses: actions/checkout@v2
+        - name: Setup Haskell
+          uses: actions/setup-haskell@v1.1
+          with:
+            ghc-version: ${{ matrix.ghc }}
+            cabal-version: ${{ matrix.cabal }}
+        - name: build all
+          run: |
+            sudo apt-get update
+            sudo apt-get install postgresql-10
+            export PATH=$PATH:/usr/lib/postgresql/10/bin
+            which pg_ctl
+            cabal build all
