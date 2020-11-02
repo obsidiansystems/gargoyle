@@ -9,7 +9,7 @@ jobs:
       matrix:
         ghc: ['8.6.5', '8.8.4', 8.10.2]
         cabal: ['3.0.0.0']
-        os: [ubuntu-latest]
+        os: ['ubuntu-latest', 'macos-latest']
     - name: Cache ~/.cabal/packages, ~/.cabal/store and dist-newstyle
       uses: actions/cache@v2
       with:
@@ -26,10 +26,21 @@ jobs:
           with:
             ghc-version: ${{ matrix.ghc }}
             cabal-version: ${{ matrix.cabal }}
-        - name: build all
+        - name: install postgres (linux)
           run: |
             sudo apt-get update
             sudo apt-get install postgresql-10
             export PATH=$PATH:/usr/lib/postgresql/10/bin
             which pg_ctl
-            cabal build all
+            echo "/usr/lib/postgresql/10/bin" >> $GITHUB_PATH
+          if: matrix.os == 'ubuntu-latest'
+        - name: install postgres (macos)
+          run: |
+            brew update
+            brew install postgresql@10
+            export PATH=$PATH:`brew --prefix`/bin
+            which pg_ctl
+            echo "$(brew --prefix)/bin" >> $GITHUB_PATH
+          if: matrix.os == 'macos-latest'
+        - name: build all
+          run: cabal build all
