@@ -1,4 +1,8 @@
 # Changelog for gargoyle-postgresql
+ 
+## 0.2.0.1
+
+* Disable test suite
 
 ## 0.2
 
