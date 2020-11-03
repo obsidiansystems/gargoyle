@@ -1,12 +1,6 @@
 name: github-action
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the develop branch
-on:
-  push:
-    branches: [ develop ]
-  pull_request:
-    branches: [ develop ]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -14,9 +8,8 @@ jobs:
     strategy:
       matrix:
         ghc: ['8.6.5', '8.8.4', 8.10.2]
-        cabal: ['3.0.0.0']
-        os: [ubuntu-latest]
-    name: Haskell GHC ${{ matrix.ghc }} sample
+        os: ['ubuntu-latest', 'macos-latest']
+    name: Haskell GHC ${{ matrix.ghc }} on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - name: Setup Haskell
@@ -24,9 +17,29 @@ jobs:
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
-      - run: |
+      - name: Cache ~/.cabal/packages, ~/.cabal/store and dist-newstyle
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cabal/packages
+            ~/.cabal/store
+            dist-newstyle
+          key: ${{ runner.os }}-${{ matrix.ghc }}
+      - name: install postgres (linux)
+        run: |
           sudo apt-get update
           sudo apt-get install postgresql-10
           export PATH=$PATH:/usr/lib/postgresql/10/bin
           which pg_ctl
-          cabal build all
+          echo "/usr/lib/postgresql/10/bin" >> $GITHUB_PATH
+        if: matrix.os == 'ubuntu-latest'
+      - name: install postgres (macos)
+        run: |
+          brew update
+          brew install postgresql@10
+          export PATH=$PATH:`brew --prefix`/bin
+          which pg_ctl
+          echo "$(brew --prefix)/bin" >> $GITHUB_PATH
+        if: matrix.os == 'macos-latest'
+      - name: build all
+        run: cabal build all
