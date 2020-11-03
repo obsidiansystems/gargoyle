@@ -5,7 +5,6 @@
 * Bugfix: Replace use of file handle with /dev/null to fix a crash due to lack of referential transparency in GHCs behavior with respect to file Handles
 * Loosen version bounds
 * Add `gargoyle-pg-run`, which makes it easier to run gargoyle-database-using programs (e.g., psql, pg_dump).
-* Enable test suite by default
 
 ## 0.1
 
