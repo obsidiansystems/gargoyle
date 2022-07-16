@@ -28,6 +28,11 @@ let
             ver = "1.9.0";
             sha256 = "1x9d86pswkncyhnzpbx4a1kmn847kjqs0ivishn84h0w6lpf12pc";
           } {};
+          posix-escape = self.callHackageDirect {
+            pkg = "posix-escape";
+            ver = "0.1";
+            sha256 = "sha256:1fivk8j9xrjvsmspq3hgv51nn4306p9m53silm5ww7a84m2a4i8a";
+          } {};
         };
       };
     in {

@@ -3,8 +3,6 @@ module Gargoyle.PostgreSQL where
 
 import Control.Monad
 import Data.ByteString (ByteString)
-import qualified Data.ByteString.Lazy as LBS
-import qualified Data.ByteString.Search as BS
 import Data.Foldable (for_)
 import Data.Maybe
 import qualified Data.Text as T
@@ -69,7 +67,7 @@ getLocalPostgresConnectionString dbDir = do
   absoluteDbDir <- makeAbsolute dbDir
   return $ mconcat $
     [ "postgresql://postgres@"
-    , (LBS.toStrict $ BS.replace "/" ("%2F" :: LBS.ByteString) $ T.encodeUtf8 $ T.pack absoluteDbDir)
+    , T.encodeUtf8 $ T.replace "/" "%2F" $ T.pack absoluteDbDir
     , "/postgres"
     ]
 
