@@ -15,4 +15,7 @@
       librarySystemDepends = (drv.librarySystemDepends or []) ++ [ (if postgresql == null then pkgs.postgresql else postgresql) ];
     });
   gargoyle-postgresql-connect = haskellPackages.callCabal2nix "gargoyle-postgresql-connect" ./gargoyle-postgresql-connect {};
+  gargoyle-nix-postgres-monitor = pkgs.haskell.lib.overrideCabal (haskellPackages.callCabal2nix "gargoyle-nix-postgres-monitor" ./gargoyle-nix-postgres-monitor {}) (drv: {
+    librarySystemDepends = (drv.librarySystemDepends or []) ++ [ (if postgresql == null then pkgs.postgresql else postgresql) ];
+  });
 }

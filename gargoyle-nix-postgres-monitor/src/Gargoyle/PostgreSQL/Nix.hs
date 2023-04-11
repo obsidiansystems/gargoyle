@@ -9,11 +9,8 @@ import Gargoyle.PostgreSQL
 
 import System.Which
 
-monitorExe :: FilePath
-monitorExe = $(staticWhich "gargoyle-nix-postgres-monitor")
-
-postgresNix :: IO (Gargoyle FilePath ByteString)
-postgresNix = do
+postgresNix :: FilePath -> IO (Gargoyle FilePath ByteString)
+postgresNix bindir = do
   return $ (mkPostgresGargoyle $(staticWhich "pg_ctl") shutdownPostgresFast)
-    { _gargoyle_exec = monitorExe
+    { _gargoyle_exec = bindir
     }

@@ -1,4 +1,4 @@
-name:               gargoyle-postgresql-nix
+name:               gargoyle-nix-postgres-monitor
 version:            0.3.0.1
 author:             Obsidian Systems LLC
 maintainer:         maintainer@obsidian.systems
@@ -18,6 +18,17 @@ extra-source-files:
 
 tested-with:        GHC ==8.6.5 || ==8.8.4 || ==8.10.7 || ==9.0.2
 
+executable gargoyle-nix-postgres-monitor
+  main-is:          gargoyle-nix-postgres-monitor.hs
+  hs-source-dirs:   src-bin
+  ghc-options:      -Wall -threaded
+  ghc-prof-options: -fprof-auto-exported
+  default-language: Haskell2010
+  build-depends:
+      base
+    , gargoyle
+    , gargoyle-nix-postgres-monitor
+
 library
   exposed-modules:  Gargoyle.PostgreSQL.Nix
   ghc-options:      -Wall
@@ -31,32 +42,3 @@ library
 
   hs-source-dirs:   src
   default-language: Haskell2010
-
-executable gargoyle-nix-psql
-  main-is:          gargoyle-nix-psql.hs
-  hs-source-dirs:   src-bin
-  ghc-options:      -Wall -threaded
-  ghc-prof-options: -fprof-auto-exported
-  default-language: Haskell2010
-  build-tool-depends: gargoyle-nix-postgres-monitor:gargoyle-nix-postgres-monitor
-  build-depends:
-      base
-    , gargoyle-postgresql
-    , gargoyle-nix-postgres-monitor
-    , which
-    , split
-
-executable gargoyle-nix-pg-run
-  main-is:          gargoyle-nix-pg-run.hs
-  hs-source-dirs:   src-bin
-  ghc-options:      -Wall -threaded
-  ghc-prof-options: -fprof-auto-exported
-  default-language: Haskell2010
-  build-tool-depends: gargoyle-nix-postgres-monitor:gargoyle-nix-postgres-monitor
-  build-depends:
-      base
-    , gargoyle
-    , which
-    , gargoyle-postgresql
-    , gargoyle-nix-postgres-monitor
-    , split
