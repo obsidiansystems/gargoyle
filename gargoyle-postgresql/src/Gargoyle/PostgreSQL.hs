@@ -53,6 +53,7 @@ initLocalPostgres binPath dbDir = do
       [ "-U", "postgres"
       , "--no-locale"
       , "-E", "UTF8"
+      , "-A", "trust"
       ]
     ]) { std_in = NoStream, std_out = UseHandle devNull, std_err = Inherit }
   r <- waitForProcess initdb
