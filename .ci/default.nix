@@ -9,8 +9,11 @@ let
     ghc884 = nixos2003;
     ghc8107 = unstable;
     ghc902 = unstable;
+    ghc928 = unstable;
+    ghc946 = unstable;
+    ghc962 = unstable;
   };
-  build = 
+  build =
     { nixpkgs ? import ./dep/nixpkgs {}
     , ghc ? null
     }:
