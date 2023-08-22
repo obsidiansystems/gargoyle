@@ -28,8 +28,8 @@ let
           } {};
           shelly = self.callHackageDirect {
             pkg = "shelly";
-            ver = "1.9.0";
-            sha256 = "1x9d86pswkncyhnzpbx4a1kmn847kjqs0ivishn84h0w6lpf12pc";
+            ver = "1.12.1";
+            sha256 = "sha256-3Sy7Twinm5+3/nwrfk5uMmWf9z088MZ7533VtyEEB8k=";
           } {};
         };
       };
