@@ -16,15 +16,15 @@ extra-source-files:
   README.md
   ChangeLog.md
 
-tested-with:        GHC ==8.6.5 || ==8.8.4 || ==8.10.7 || ==9.0.2
+tested-with:        GHC ==8.6.5 || ==8.8.4 || ==8.10.7 || ==9.0.2 || ==9.8.2
 
 library
   exposed-modules:  Gargoyle.PostgreSQL.Nix
   ghc-options:      -Wall
   ghc-prof-options: -fprof-auto-exported
   build-depends:
-      base                 >=4.12 && <4.17
-    , bytestring           >=0.10 && <0.12
+      base                 >=4.12 && <4.20
+    , bytestring           >=0.10 && <0.13
     , gargoyle             >=0.1  && <0.2
     , gargoyle-postgresql  >=0.2  && <0.3
     , which                >=0.2  && <0.3

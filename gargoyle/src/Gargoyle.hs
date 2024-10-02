@@ -187,7 +187,8 @@ gargoyleMain g = void $ forkProcess $ do
           n <- takeMVar numClientsVar
           case pred n of
             0 -> do
-              shutdown controlSocket ShutdownBoth
+              -- If the client side beats us to this, we'll get an error here. This might be specific to Apple Silicon.
+              catch (shutdown controlSocket ShutdownBoth) $ \(_ :: IOException) -> pure ()
               -- We have to explicitly kill the accept thread, because otherwise (sometimes?) 'accept' will begin returning EAGAIN, and ghc will continuously retry it.  This busywait consumes 100% of CPU, prevents the monitor from actually exiting, and leaves the control socket and lock file in a state where another monitor can't be started.
               killThread acceptThread
               putMVar shutdownVar ()

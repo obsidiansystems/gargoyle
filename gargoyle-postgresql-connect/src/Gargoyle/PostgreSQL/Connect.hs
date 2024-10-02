@@ -1,9 +1,10 @@
+{-# LANGUAGE TypeApplications #-}
 module Gargoyle.PostgreSQL.Connect (withDb, withDb', openDb) where
 
 import Control.Monad ((>=>))
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as C8
-import Data.Pool (Pool, createPool)
+import Data.Pool (Pool, defaultPoolConfig, newPool, setNumStripes)
 import Database.PostgreSQL.Simple (Connection, close, connectPostgreSQL)
 import Gargoyle (withGargoyle)
 import Gargoyle.PostgreSQL.Nix (postgresNix)
@@ -17,7 +18,7 @@ withDb dbPath f = either error pure =<< withDb' dbPath (openDb >=> f)
 
 -- | Convert a connection string into a connection 'Pool'.
 openDb :: ByteString -> IO (Pool Connection)
-openDb dbUri = createPool (connectPostgreSQL dbUri) close 1 5 20
+openDb dbUri = newPool $ setNumStripes (Just 1) $ defaultPoolConfig (connectPostgreSQL dbUri) close (realToFrac @Int 5) 20
 
 -- | Connects to a database using information at the given filepath.
 -- The given filepath can be either a folder (for a local db)
