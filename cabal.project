@@ -3,3 +3,4 @@ packages:
     gargoyle-postgresql/
     gargoyle-postgresql-nix/
     gargoyle-postgresql-connect/
+    gargoyle-nix-postgres-monitor/

@@ -26,3 +26,7 @@ static/assets
 db
 *.jsexe
 cabal.project.local
+
+# Nix
+result
+result-*
