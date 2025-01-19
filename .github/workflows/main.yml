@@ -7,8 +7,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        ghc: ['8.6.5', '8.8.4', '8.10.7', '9.0.2', '9.8.2']
-        os: ['ubuntu-latest', 'macos-latest']
+        ghc: ['8.6.5', '8.8.4', '8.10.7', '9.0.2', '9.8.2', '9.10.1']
+        os: ['ubuntu-latest'] # Disabled macos until https://github.com/haskellari/postgresql-libpq/issues/71 is figured out
     name: Haskell GHC ${{ matrix.ghc }} on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -18,7 +18,7 @@ jobs:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
       - name: Cache ~/.cabal/packages, ~/.cabal/store and dist-newstyle
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cabal/packages
@@ -28,18 +28,13 @@ jobs:
       - name: install postgres (linux)
         run: |
           sudo apt-get update
-          sudo apt-get install postgresql-14
-          export PATH=$PATH:/usr/lib/postgresql/14/bin
-          which pg_ctl
-          echo "/usr/lib/postgresql/14/bin" >> $GITHUB_PATH
+          sudo apt-get install postgresql-16
+          echo "/usr/lib/postgresql/16/bin" >> $GITHUB_PATH
         if: matrix.os == 'ubuntu-latest'
       - name: install postgres (macos)
         run: |
           brew update
           brew install postgresql@14
-          export PATH=$PATH:`brew --prefix`/bin
-          which pg_ctl
-          echo "$(brew --prefix)/bin" >> $GITHUB_PATH
         if: matrix.os == 'macos-latest'
       - name: build all
         run: cabal build all
