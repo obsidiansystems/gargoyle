@@ -1,5 +1,9 @@
 # Revision history for gargoyle-postgresql-nix
 
+## 0.3.0.2
+
+* Support GHC 9.12
+
 ## 0.3.0.1
 
 * Add support for ghc 9.0.2
