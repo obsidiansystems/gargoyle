@@ -1,5 +1,9 @@
 # Changelog for gargoyle
 
+## 0.1.2.1
+
+* Support GHC 9.10
+
 ## 0.1.2.0
 
 * Fix a bug with shutting down on Apple Silicon

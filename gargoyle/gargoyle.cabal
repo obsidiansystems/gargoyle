@@ -1,5 +1,5 @@
 name:               gargoyle
-version:            0.1.2.0
+version:            0.1.2.1
 license:            BSD3
 license-file:       LICENSE
 author:             Obsidian Systems LLC
@@ -22,7 +22,7 @@ extra-source-files:
   ChangeLog.md
   README.md
 
-tested-with:        GHC ==8.6.5 || ==8.8.4 || ==8.10.7 || ==9.0.2 || ==9.8.2
+tested-with:        GHC ==8.6.5 || ==8.8.4 || ==8.10.7 || ==9.0.2 || ==9.8.2 || ==9.10.1
 
 library
   exposed-modules:  Gargoyle
