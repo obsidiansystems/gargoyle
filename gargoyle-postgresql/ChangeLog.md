@@ -1,5 +1,9 @@
 # Changelog for gargoyle-postgresql
- 
+
+## 0.2.0.2
+
+* Support GHC 9.10
+
 ## 0.2.0.2
 
 * Add support for ghc 9.0.2

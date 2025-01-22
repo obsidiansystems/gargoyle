@@ -1,5 +1,5 @@
 name:               gargoyle-postgresql
-version:            0.2.0.2
+version:            0.2.0.3
 license:            BSD3
 license-file:       LICENSE
 author:             Obsidian Systems LLC
@@ -33,7 +33,7 @@ description:
   > withDb dbPath a = withGargoyle defaultPostgres dbPath $ \dbUri -> a =<< connectPostgreSQL dbUri
 
 extra-source-files: ChangeLog.md
-tested-with:        GHC ==8.6.5 || ==8.8.4 || ==8.10.7 || ==9.0.2 || ==9.8.2
+tested-with:        GHC ==8.6.5 || ==8.8.4 || ==8.10.7 || ==9.0.2 || ==9.8.2 || ==9.10.1
 
 -- Requires postgres to be in the environment to run
 flag enable-psql-test
