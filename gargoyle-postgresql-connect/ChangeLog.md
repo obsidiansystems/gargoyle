@@ -1,5 +1,9 @@
 # Revision history for gargoyle-postgresql-connect
 
+## 0.1.0.3
+
+* Support GHC 9.10
+
 ## 0.1.0.2
 
 * Require resource-pool 0.4.*

@@ -1,5 +1,5 @@
 name:               gargoyle-postgresql-connect
-version:            0.1.0.2
+version:            0.1.0.3
 author:             Obsidian Systems LLC
 maintainer:         maintainer@obsidian.systems
 copyright:          Copyright (C) 2019 Obsidian Systems LLC
@@ -11,7 +11,7 @@ synopsis:           Connect to gargoyle-managed postgresql instances
 extra-source-files: ChangeLog.md
 category:           System
 description:        A convenience utility for connecting to a postgresql instance managed by gargoyle.
-tested-with:        GHC ==8.6.5 || ==8.8.4 || ==8.10.7 || ==9.0.2 || ==9.8.2
+tested-with:        GHC ==8.6.5 || ==8.8.4 || ==8.10.7 || ==9.0.2 || ==9.8.2 || ==9.10.1
 
 library
   exposed-modules:  Gargoyle.PostgreSQL.Connect
