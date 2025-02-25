@@ -11,7 +11,7 @@ import Gargoyle.PostgreSQL
 main :: IO ()
 main = do
   let testPostgres = defaultPostgres
-        { _gargoyle_exec = "dist/build" </> "gargoyle-postgres-monitor/gargoyle-postgres-monitor"
+        { _gargoyle_exec = "gargoyle-postgres-monitor"
         }
   --TODO make this exception safe
   testPath <- mkdtemp "psql-test"
