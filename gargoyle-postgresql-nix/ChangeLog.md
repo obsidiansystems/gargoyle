@@ -2,7 +2,7 @@
 
 ## 0.3.0.2
 
-* Support GHC 9.12
+* Support GHC 9.10
 
 ## 0.3.0.1
 
