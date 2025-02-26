@@ -1,5 +1,7 @@
+{-# LANGUAGE NumDecimals #-}
 module Main where
 
+import Control.Concurrent
 import System.Directory
 import System.Exit
 import System.FilePath
@@ -16,5 +18,6 @@ main = do
   --TODO make this exception safe
   testPath <- mkdtemp "psql-test"
   psqlLocal testPostgres "psql" (testPath </> "db") (Just "")
+  threadDelay 1e6 --TODO: workaround for apparent race condition when removing db/work
   removeDirectoryRecursive testPath
   exitSuccess
