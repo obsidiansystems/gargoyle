@@ -1,5 +1,9 @@
 # Changelog for gargoyle
 
+## 0.1.2.2
+
+* Support GHC 9.12
+
 ## 0.1.2.1
 
 * Support GHC 9.10
