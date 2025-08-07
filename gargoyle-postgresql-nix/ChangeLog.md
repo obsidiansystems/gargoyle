@@ -1,5 +1,9 @@
 # Revision history for gargoyle-postgresql-nix
 
+## 0.3.0.4
+
+* Support GHC 9.12
+
 ## 0.3.0.3
 
 * Add `libpq` to `pkgconfig-depends`
