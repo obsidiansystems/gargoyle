@@ -39,3 +39,5 @@ jobs:
         if: matrix.os == 'macos-latest'
       - name: build all
         run: cabal build all
+      - name: test all
+        run: cabal test all

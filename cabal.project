@@ -3,3 +3,6 @@ packages:
     gargoyle-postgresql/
     gargoyle-postgresql-nix/
     gargoyle-postgresql-connect/
+
+package gargoyle-postgresql
+  flags: +enable-psql-test
